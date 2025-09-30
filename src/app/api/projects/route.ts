@@ -2,6 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
 
+interface LandingPageBlock {
+  type: string;
+  subtype: string;
+  content: string;
+}
+
+interface LandingPageContent {
+  [key: string]: any;
+}
+
+interface LandingPageData {
+  sitemap: string[];
+  blocks: {
+    [key: string]: LandingPageBlock;
+  };
+  block_contents: {
+    [key: string]: LandingPageContent;
+  };
+}
+
 interface Project {
   id: string;
   userId: string;
@@ -10,6 +30,7 @@ interface Project {
   name?: string;
   createdAt: string;
   updatedAt: string;
+  landing_page_data?: LandingPageData;
 }
 
 let projects: Project[] = [];
@@ -58,6 +79,33 @@ export async function POST(request: NextRequest) {
           status: 'completed',
           name: `Landing Page #${newProject.id}`,
           updatedAt: new Date().toISOString(),
+          landing_page_data: {
+            sitemap: ["block_001", "block_002"],
+            blocks: {
+              block_001: {
+                type: "navbar",
+                subtype: "Navbar1",
+                content: "content_001"
+              },
+              block_002: {
+                type: "hero_header_section",
+                subtype: "Layout1",
+                content: "content_002"
+              }
+            },
+            block_contents: {
+              content_001: {
+                logo_src: "/logo.png",
+                button: "Get Started"
+              },
+              content_002: {
+                title: "Build Beautiful Landing Pages",
+                desc: "Create stunning landing pages with AI assistance. Fast, beautiful, and conversion-optimized.",
+                button1: "Get Started",
+                button2: "Learn More"
+              }
+            }
+          }
         };
       }
     }, 3000);

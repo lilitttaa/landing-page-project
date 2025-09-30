@@ -5,6 +5,26 @@ import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
+interface LandingPageBlock {
+  type: string;
+  subtype: string;
+  content: string;
+}
+
+interface LandingPageContent {
+  [key: string]: any;
+}
+
+interface LandingPageData {
+  sitemap: string[];
+  blocks: {
+    [key: string]: LandingPageBlock;
+  };
+  block_contents: {
+    [key: string]: LandingPageContent;
+  };
+}
+
 interface Project {
   id: string;
   userId: string;
@@ -13,6 +33,7 @@ interface Project {
   name?: string;
   createdAt: string;
   updatedAt: string;
+  landing_page_data?: LandingPageData;
 }
 
 export default function Dashboard() {
@@ -194,9 +215,11 @@ export default function Dashboard() {
                           <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                             Edit
                           </button>
-                          <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                            Preview
-                          </button>
+                          <Link href={`/preview/${project.id}`} target="_blank">
+                            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                              Preview
+                            </button>
+                          </Link>
                         </div>
                       ) : (
                         <span className="text-sm text-gray-500">

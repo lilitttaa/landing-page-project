@@ -15,6 +15,9 @@ src/
 │   │       └── page.tsx           # Email/password registration
 │   ├── dashboard/
 │   │   └── page.tsx               # Protected dashboard with user projects
+│   ├── preview/
+│   │   └── [id]/
+│   │       └── page.tsx           # Landing page preview with SSR
 │   ├── api/
 │   │   ├── auth/
 │   │   │   ├── [...nextauth]/
@@ -22,11 +25,15 @@ src/
 │   │   │   └── register/
 │   │   │       └── route.ts       # User registration API
 │   │   └── projects/
-│   │       └── route.ts           # User-specific projects API
+│   │       └── route.ts           # User-specific projects API with landing page data
 │   ├── layout.tsx                 # Root layout with session provider
 │   └── globals.css                # Global styles
 ├── components/
-│   └── AuthProvider.tsx           # NextAuth session provider wrapper
+│   ├── AuthProvider.tsx           # NextAuth session provider wrapper
+│   └── landing-page/
+│       ├── Navbar1.tsx            # Responsive navbar component
+│       ├── Layout1.tsx            # Hero header section component
+│       └── BlockRenderer.tsx      # Dynamic component renderer
 ├── lib/
 │   └── userService.ts             # User management and authentication
 └── types/
@@ -71,6 +78,7 @@ src/
   - Loading states with animated spinners for generating projects
   - Status badges (generating → completed with 3-second simulation)
   - Actions (Edit/Preview for completed projects)
+  - Preview functionality opens generated landing pages in new tab
 - **Empty State**: Call-to-action for users with no projects
 
 ### Authentication Pages
@@ -107,6 +115,13 @@ src/
   - Server-side validation and sanitization
   - Duplicate email prevention
   - Secure password hashing before storage
+
+### Page 3 - Landing Page Preview (`/preview/[id]`)
+- **Server-Side Rendered Landing Pages**: Dynamic rendering of generated landing pages
+- **Component-Based Architecture**: Modular blocks rendered from structured data
+- **Real-Time Content**: Live preview of user-generated landing pages
+- **Responsive Design**: Mobile-first responsive components
+- **Error Handling**: Graceful fallbacks for missing data or components
 
 ## Data Flow & Security
 
@@ -145,8 +160,15 @@ src/
 2. Client sends POST request to `/api/projects` with session token
 3. Server validates session and creates project with "generating" status
 4. User redirected to dashboard showing new project with loading spinner
-5. Server simulates generation (3 seconds) then updates status to "completed"
+5. Server simulates generation (3 seconds) then updates status to "completed" with landing page data
 6. Dashboard polls and updates UI when project is ready
+7. User can click "Preview" to view generated landing page at `/preview/[id]`
+
+### Landing Page Generation & Rendering
+1. **Data Structure**: Projects include structured landing page data with sitemap, blocks, and content
+2. **Component Mapping**: Dynamic component rendering based on block types (Navbar1, Layout1, etc.)
+3. **Server-Side Rendering**: Preview pages are rendered server-side for optimal performance
+4. **Real-Time Preview**: Instant access to generated landing pages through preview links
 
 ## Tech Stack
 
@@ -235,6 +257,26 @@ interface Session {
 
 ### Project
 ```typescript
+interface LandingPageBlock {
+  type: string;
+  subtype: string;
+  content: string;
+}
+
+interface LandingPageContent {
+  [key: string]: any;
+}
+
+interface LandingPageData {
+  sitemap: string[];
+  blocks: {
+    [key: string]: LandingPageBlock;
+  };
+  block_contents: {
+    [key: string]: LandingPageContent;
+  };
+}
+
 interface Project {
   id: string;
   userId: string;
@@ -243,6 +285,27 @@ interface Project {
   name?: string;
   createdAt: string;
   updatedAt: string;
+  landing_page_data?: LandingPageData;
+}
+```
+
+### Landing Page Components
+
+#### Navbar1 Component
+```typescript
+interface Navbar1Props {
+  logo_src: string;
+  button: string;
+}
+```
+
+#### Layout1 Component  
+```typescript
+interface Layout1Props {
+  title: string;
+  desc: string;
+  button1: string;
+  button2: string;
 }
 ```
 
@@ -276,7 +339,10 @@ interface Project {
 
 ### Project APIs
 - `GET /api/projects` - Get user's projects (protected)
-- `POST /api/projects` - Create new project (protected)
+- `POST /api/projects` - Create new project with landing page data generation (protected)
+
+### Preview APIs
+- `GET /preview/[id]` - Server-side rendered landing page preview
 
 ### NextAuth.js APIs
 - `GET/POST /api/auth/[...nextauth]` - NextAuth.js handler
@@ -293,24 +359,32 @@ interface Project {
 
 ### UI Components
 - **Landing Page**: Auth-aware interface with dynamic states
-- **Dashboard**: Full web app layout with user profile
+- **Dashboard**: Full web app layout with user profile and preview functionality
 - **Forms**: Comprehensive validation and error states
 - **Loading States**: Animated feedback for async operations
 
+### Landing Page Components
+- **Navbar1**: Responsive navigation bar with logo and CTA button
+- **Layout1**: Hero header section with title, description, and dual CTAs
+- **BlockRenderer**: Dynamic component mapper for rendering different block types
+- **Preview System**: Server-side rendered landing page previews
+
 ### Backend Services
 - **UserService**: User management, validation, and password hashing
-- **Projects API**: CRUD operations with user isolation
+- **Projects API**: CRUD operations with user isolation and landing page data generation
 - **NextAuth Configuration**: Multi-provider authentication setup
+- **Landing Page Engine**: Component-based rendering system with structured data
 
 ## Testing Results
 
-Based on server logs, all authentication flows are working correctly:
+Based on server logs, all authentication flows and landing page generation are working correctly:
 - ✅ User registration (POST /api/auth/register 201)
 - ✅ Credentials login (POST /api/auth/callback/credentials 200)
 - ✅ Dashboard access (GET /dashboard 200)
-- ✅ Project creation (POST /api/projects 201)
+- ✅ Project creation with landing page data (POST /api/projects 201)
 - ✅ Session management (GET /api/auth/session 200)
 - ✅ User logout (POST /api/auth/signout 200)
+- ✅ Landing page preview rendering (GET /preview/[id] 200)
 
 ## Known Issues
 
@@ -333,12 +407,15 @@ Based on server logs, all authentication flows are working correctly:
 
 ### Application Features
 - **Real AI Integration**: Connect to actual AI services for landing page generation
+- **More Component Types**: Expand beyond Navbar1 and Layout1 (Footer, Features, Testimonials, etc.)
 - **Project Templates**: Pre-built templates and themes
 - **Advanced Editor**: Visual page builder with drag-and-drop
 - **Export Functionality**: Download generated pages as HTML/React components
 - **Team Collaboration**: Shared projects and user management
 - **Analytics Dashboard**: Usage tracking and performance metrics
 - **Payment Integration**: Subscription plans and usage limits
+- **SEO Optimization**: Meta tags, structured data, and performance optimization
+- **Custom Domains**: Allow users to publish on custom domains
 
 ### Developer Experience
 - **Testing Suite**: Comprehensive test coverage for authentication flows
