@@ -101,16 +101,83 @@ export default App;`;
 
     const appPath = path.join(projectPath, 'src', 'App.tsx');
     await fs.promises.writeFile(appPath, appContent);
+
+    // Copy the actual component files from the main project
+    await this.copyComponentFiles(projectPath, landingPageData);
+  }
+
+  private async copyComponentFiles(projectPath: string, landingPageData: LandingPageData): Promise<void> {
+    const componentsDir = path.join(projectPath, 'src', 'components');
+    await fs.promises.mkdir(componentsDir, { recursive: true });
+
+    const mainComponentsPath = path.join(process.cwd(), 'src', 'components', 'landing-page');
+    const { sitemap, blocks } = landingPageData;
+
+    // Check which components we need
+    const neededComponents = new Set<string>();
+    for (const blockId of sitemap) {
+      const block = blocks[blockId];
+      if (block.subtype === 'Navbar1') {
+        neededComponents.add('Navbar1');
+      } else if (block.subtype === 'Layout1') {
+        neededComponents.add('Layout1');
+      }
+    }
+
+    // Copy and adapt component files
+    for (const componentName of neededComponents) {
+      const sourceFile = path.join(mainComponentsPath, `${componentName}.tsx`);
+      let content = await fs.promises.readFile(sourceFile, 'utf-8');
+      
+      // Adapt the component for standalone use
+      if (componentName === 'Navbar1') {
+        // Rename interfaces and add proper prop types
+        content = content.replace('interface Navbar1Props', 'interface NavbarProps');
+        content = content.replace('{ logo_src, button }: Navbar1Props', '{ logoSrc, button }: NavbarProps');
+        content = content.replace(/logo_src/g, 'logoSrc'); // Replace all occurrences
+        content = content.replace('export default function Navbar1', 'export default function Navbar');
+        
+        const targetFile = path.join(componentsDir, 'Navbar.tsx');
+        await fs.promises.writeFile(targetFile, content);
+      } else if (componentName === 'Layout1') {
+        // Rename interfaces and export
+        content = content.replace('interface Layout1Props', 'interface HeroSectionProps');
+        content = content.replace('{ title, desc, button1, button2 }: Layout1Props', '{ title, desc, button1, button2 }: HeroSectionProps');
+        content = content.replace('export default function Layout1', 'export default function HeroSection');
+        
+        const targetFile = path.join(componentsDir, 'HeroSection.tsx');
+        await fs.promises.writeFile(targetFile, content);
+      }
+    }
   }
 
   async buildProject(projectPath: string): Promise<string> {
-    // Since we can't use exec in edge runtime, we'll simulate the build
-    // In a real implementation, this would be done via a separate build service
+    // For development, we'll create a simple HTML file that directly renders the components
+    // In production, this would use actual Vite build process
     const distPath = path.join(projectPath, 'dist');
     await fs.promises.mkdir(distPath, { recursive: true });
     
-    // Create a simple index.html that loads the generated content
-    const indexHtml = `<!DOCTYPE html>
+    // Read the landing page data to generate the HTML
+    const appPath = path.join(projectPath, 'src', 'App.tsx');
+    const appContent = await fs.promises.readFile(appPath, 'utf-8');
+    
+    // For now, create a simplified HTML version
+    // In a real implementation, we would run: npm install && npm run build
+    const indexHtml = await this.generateStaticHtml(projectPath, appContent);
+    
+    await fs.promises.writeFile(path.join(distPath, 'index.html'), indexHtml);
+    
+    return distPath;
+  }
+
+  private async generateStaticHtml(projectPath: string, appContent: string): Promise<string> {
+    // Extract component usage from App.tsx to render static HTML
+    const componentsDir = path.join(projectPath, 'src', 'components');
+    const componentFiles = await fs.promises.readdir(componentsDir).catch(() => []);
+    
+    // Simple static HTML generation based on component structure
+    // This creates a working preview - in production you'd use the actual build process
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -118,92 +185,55 @@ export default App;`;
     <title>Landing Page</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <div id="root"></div>
-    <script>
-        // Simple React app rendering
+    <script type="text/babel">
         const { useState, useEffect } = React;
         
-        function Navbar({ logoSrc, button }) {
-            return React.createElement('nav', {
-                className: 'bg-white shadow-sm border-b border-gray-200'
-            }, React.createElement('div', {
-                className: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'
-            }, React.createElement('div', {
-                className: 'flex justify-between items-center h-16'
-            }, [
-                React.createElement('div', { className: 'flex items-center', key: 'logo' },
-                    React.createElement('img', { className: 'h-8 w-auto', src: logoSrc, alt: 'Logo' })
-                ),
-                React.createElement('div', { key: 'button' },
-                    React.createElement('button', {
-                        className: 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors'
-                    }, button)
-                )
-            ])));
-        }
+        // Component definitions will be injected here
+        ${await this.getComponentDefinitions(componentsDir, componentFiles)}
         
-        function HeroSection({ title, desc, button1, button2 }) {
-            return React.createElement('div', {
-                className: 'bg-white'
-            }, React.createElement('div', {
-                className: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20'
-            }, React.createElement('div', {
-                className: 'text-center'
-            }, [
-                React.createElement('h1', {
-                    className: 'text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl',
-                    key: 'title'
-                }, title),
-                React.createElement('p', {
-                    className: 'mt-6 max-w-3xl mx-auto text-xl text-gray-600',
-                    key: 'desc'
-                }, desc),
-                React.createElement('div', {
-                    className: 'mt-10 flex justify-center space-x-4',
-                    key: 'buttons'
-                }, [
-                    React.createElement('button', {
-                        className: 'bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors',
-                        key: 'btn1'
-                    }, button1),
-                    React.createElement('button', {
-                        className: 'bg-gray-200 hover:bg-gray-300 text-gray-900 px-8 py-3 rounded-lg font-semibold text-lg transition-colors',
-                        key: 'btn2'
-                    }, button2)
-                ])
-            ])));
-        }
+        // App component
+        ${await this.getAppDefinition(appContent)}
         
-        function App() {
-            return React.createElement('div', {
-                className: 'min-h-screen bg-white'
-            }, [
-                React.createElement(Navbar, {
-                    logoSrc: '/logo.png',
-                    button: 'Get Started',
-                    key: 'navbar'
-                }),
-                React.createElement(HeroSection, {
-                    title: 'Build Beautiful Landing Pages',
-                    desc: 'Create stunning landing pages with AI assistance. Fast, beautiful, and conversion-optimized.',
-                    button1: 'Get Started',
-                    button2: 'Learn More',
-                    key: 'hero'
-                })
-            ]);
-        }
-        
-        ReactDOM.render(React.createElement(App), document.getElementById('root'));
+        ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
 </html>`;
+  }
 
-    await fs.promises.writeFile(path.join(distPath, 'index.html'), indexHtml);
+  private async getComponentDefinitions(componentsDir: string, componentFiles: string[]): Promise<string> {
+    let definitions = '';
     
-    return distPath;
+    for (const file of componentFiles) {
+      if (file.endsWith('.tsx')) {
+        const componentPath = path.join(componentsDir, file);
+        let content = await fs.promises.readFile(componentPath, 'utf-8');
+        
+        // Clean up TypeScript syntax for Babel browser compilation
+        content = content.replace(/interface\s+\w+Props\s*\{[^}]*\}/g, ''); // Remove interfaces
+        content = content.replace(/:\s*\w+Props/g, ''); // Remove type annotations
+        content = content.replace(/as\s+\w+/g, ''); // Remove type assertions like "as HTMLImageElement"
+        content = content.replace(/export default/g, ''); // Remove export default
+        
+        definitions += content + '\n\n';
+      }
+    }
+    
+    return definitions;
+  }
+
+  private async getAppDefinition(appContent: string): Promise<string> {
+    // Clean up App component for browser compilation
+    let cleanContent = appContent;
+    cleanContent = cleanContent.replace(/import[^;]+;/g, ''); // Remove imports
+    cleanContent = cleanContent.replace(/export default/g, ''); // Remove export default
+    cleanContent = cleanContent.replace(/^\s*\w+\s*;\s*$/gm, ''); // Remove standalone statements like "App;"
+    
+    return cleanContent.trim();
   }
 
   async getDistPath(projectId: string): Promise<string> {

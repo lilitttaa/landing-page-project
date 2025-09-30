@@ -1,6 +1,6 @@
 # Landing Page Builder
 
-A Next.js TypeScript application for creating and managing landing pages with AI assistance, featuring comprehensive authentication (Google OAuth + Email/Password), per-user data storage, and full deployment functionality.
+A Next.js 15.5.4 TypeScript application for creating and managing landing pages with AI assistance, featuring comprehensive authentication (Google OAuth + Email/Password), per-user data storage, and full deployment functionality with React project generation.
 
 ## Project Structure
 
@@ -36,7 +36,7 @@ src/
 │   │       └── [...slug]/
 │   │           └── route.ts       # Static asset serving for deployed projects
 │   ├── layout.tsx                 # Root layout with session provider
-│   └── globals.css                # Global styles
+│   └── globals.css                # Global styles with Geist fonts
 ├── components/
 │   ├── AuthProvider.tsx           # NextAuth session provider wrapper
 │   └── landing-page/
@@ -49,13 +49,17 @@ src/
 └── types/
     └── next-auth.d.ts             # TypeScript declarations for NextAuth
 template/                          # React project template for deployment
-├── package.json                   # Template dependencies
-├── vite.config.ts                # Vite build configuration
+├── package.json                   # Template dependencies (React 18, Vite 4)
+├── vite.config.ts                # Vite build configuration with SWC
 ├── src/
 │   ├── App.tsx                   # Template app component
 │   ├── main.tsx                  # React entry point
-│   └── components/               # Reusable components
+│   └── components/               # Reusable components (generated from main project)
 └── public/                       # Static assets
+generated-sites/                   # Generated project builds
+├── [projectId]/                  # Individual project directories
+│   ├── dist/                     # Built static files
+│   └── src/                      # Source code with adapted components
 middleware.ts                     # Subdomain routing middleware
 ```
 
@@ -154,31 +158,53 @@ middleware.ts                     # Subdomain routing middleware
 
 ## Deployment System
 
-### Project Generation
+### Project Generation Engine
 - **React+TypeScript+Tailwind Template**: Complete project template with modern tooling
 - **Dynamic Component Generation**: Converts landing page data into React components
+- **Component Adaptation**: Automatically adapts components from main app to standalone versions
 - **Vite Build System**: Fast development and optimized production builds
 - **Asset Optimization**: Automatic asset bundling and optimization
 
 ### Build Process
-1. **Template Copying**: Copies base React project template
-2. **Component Generation**: Creates React components from landing page data
-3. **Build Compilation**: Generates optimized HTML, CSS, and JavaScript
-4. **Asset Management**: Handles static assets with proper caching headers
+1. **Template Copying**: Copies base React project template from `/template` directory
+2. **Component Generation**: Creates React components from landing page data structure
+3. **Component Adaptation**: Transforms main app components (Navbar1, Layout1) to standalone versions
+4. **Build Compilation**: Generates optimized static HTML with CDN resources for browser compatibility
+5. **Asset Management**: Handles static assets with proper caching headers
+
+### Component Transformation Process
+- **Navbar1 → Navbar**: Interface renaming (`Navbar1Props` → `NavbarProps`), prop mapping (`logo_src` → `logoSrc`)
+- **Layout1 → HeroSection**: Interface transformation (`Layout1Props` → `HeroSectionProps`), export name changes
+- **Dynamic Import Mapping**: Generates proper component imports in App.tsx based on landing page structure
 
 ### Access Methods
 - **Development Environment**: 
-  - Main app: `http://localhost:3004`
-  - Deployed projects: `http://localhost:3004/deployed/project-{id}`
+  - Main app: `http://localhost:3003`
+  - Deployed projects: `http://localhost:3003/deployed/project-{id}`
 - **Production Environment**:
   - Main app: `https://yourdomain.com`
-  - Deployed projects: `https://project-{id}.yourdomain.com`
+  - Deployed projects: `https://project-{id}.yourdomain.com` (via middleware subdomain routing)
+
+### Generated Project Structure
+```
+generated-sites/[projectId]/
+├── dist/                         # Built static files
+│   └── index.html               # Standalone HTML with CDN resources
+├── src/
+│   ├── App.tsx                  # Generated app component
+│   └── components/
+│       ├── Navbar.tsx           # Adapted from Navbar1
+│       └── HeroSection.tsx      # Adapted from Layout1
+├── package.json                 # React 18 + Vite 4 dependencies
+└── vite.config.ts               # SWC build configuration
+```
 
 ### Deployment Features
-- **Progress Tracking**: Real-time deployment status with UI feedback
-- **Asynchronous Processing**: Non-blocking deployment with status polling
+- **Progress Tracking**: Real-time deployment status with UI feedback using polling mechanism
+- **Asynchronous Processing**: Non-blocking deployment with status tracking via Map storage
 - **Error Handling**: Comprehensive error handling and user feedback
-- **Resource Independence**: All assets load correctly in any environment
+- **Resource Independence**: All assets load correctly in any environment via CDN resources
+- **Subdomain Routing**: Middleware-based routing for both development paths and production subdomains
 
 ## Data Flow & Security
 
@@ -240,20 +266,45 @@ middleware.ts                     # Subdomain routing middleware
 - **Language**: TypeScript with strict type checking
 - **Authentication**: 
   - NextAuth.js with Google OAuth and Credentials providers
-  - bcryptjs for password hashing
-- **Styling**: Tailwind CSS with responsive design
+  - bcryptjs for password hashing (12 salt rounds)
+- **Styling**: Tailwind CSS 4 with responsive design and Geist fonts
 - **State Management**: React useState + server-side session management
 - **API**: Next.js API routes with comprehensive session validation
-- **Build System**: Vite for deployed project builds
-- **Deployment**: React+TypeScript template with optimized builds
+- **Build System**: Vite 4 with SWC for deployed project builds
+- **Template Engine**: React 18 + TypeScript + Tailwind template system
 - **Development**: Hot reloading with Turbopack
+
+## Core Dependencies
+
+### Main Application
+```json
+{
+  "next": "15.5.4",
+  "react": "19.1.0", 
+  "react-dom": "19.1.0",
+  "next-auth": "^4.24.11",
+  "bcryptjs": "^3.0.2",
+  "tailwindcss": "^4"
+}
+```
+
+### Generated Projects Template
+```json
+{
+  "react": "^18.2.0",
+  "react-dom": "^18.2.0", 
+  "vite": "^4.4.0",
+  "@vitejs/plugin-react-swc": "^3.3.0",
+  "tailwindcss": "^3.3.0"
+}
+```
 
 ## Environment Configuration
 
 ### Required Environment Variables
 ```bash
 # NextAuth.js Configuration
-NEXTAUTH_URL=http://localhost:3004
+NEXTAUTH_URL=http://localhost:3003
 NEXTAUTH_SECRET=your-secure-random-secret
 
 # Google OAuth Configuration (Optional - only needed for Google login)
@@ -265,7 +316,7 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 1. Create project in [Google Cloud Console](https://console.cloud.google.com/)
 2. Enable Google+ API
 3. Create OAuth 2.0 credentials
-4. Add authorized redirect URI: `http://localhost:3004/api/auth/callback/google`
+4. Add authorized redirect URI: `http://localhost:3003/api/auth/callback/google`
 5. Update environment variables with real credentials
 
 **Note**: The app works fully with just email/password authentication if Google OAuth credentials are not configured.
@@ -292,8 +343,8 @@ npm run lint
 ## Development Server
 
 The app runs on:
-- **Local**: http://localhost:3004 (auto-detects available port)
-- **Network**: http://192.168.3.30:3004
+- **Local**: http://localhost:3003 (auto-detects available port)
+- **Network**: http://192.168.3.30:3003
 
 ## Data Models
 
@@ -473,12 +524,14 @@ Based on server logs, all authentication flows, landing page generation, and dep
 - ✅ Deployed project access (GET /deployed/[subdomain] 200)
 - ✅ Static asset serving (GET /api/deployed/[...slug] 200)
 
-## Known Issues
+## Known Issues & Current Limitations
 
-- **Development OAuth**: Google OAuth may have timeout errors with demo credentials (expected)
-- **In-Memory Storage**: Users and projects reset on server restart (database integration needed)
-- **Port Auto-detection**: Server automatically uses available ports (3000, 3001, 3004, etc.)
-- **Build Simulation**: Currently using HTML generation instead of full Vite builds (for development speed)
+- **Development OAuth**: Google OAuth may have timeout errors with demo credentials (expected behavior)
+- **In-Memory Storage**: Users and projects reset on server restart (database integration needed for production)
+- **Port Auto-detection**: Server automatically uses available ports (3000, 3001, 3003, etc.)
+- **Simplified Build Process**: Currently using HTML generation with CDN resources instead of full Vite builds for development speed
+- **Component Library**: Limited to Navbar1 and Layout1 components (expandable architecture in place)
+- **Asset Serving**: Static assets served through API routes rather than dedicated CDN in development
 
 ## Future Enhancements
 
@@ -494,18 +547,20 @@ Based on server logs, all authentication flows, landing page generation, and dep
 - **Social Logins**: Additional OAuth providers (GitHub, Facebook, etc.)
 
 ### Application Features
-- **Real AI Integration**: Connect to actual AI services for landing page generation
-- **Real Build System**: Implement actual Vite builds with npm install
-- **Custom Domains**: Allow users to deploy on custom domains
-- **More Component Types**: Expand beyond Navbar1 and Layout1 (Footer, Features, Testimonials, etc.)
-- **Project Templates**: Pre-built templates and themes
-- **Advanced Editor**: Visual page builder with drag-and-drop
-- **Export Functionality**: Download generated pages as HTML/React components
-- **Team Collaboration**: Shared projects and user management
-- **Analytics Dashboard**: Usage tracking and performance metrics
-- **Payment Integration**: Subscription plans and usage limits
-- **SEO Optimization**: Meta tags, structured data, and performance optimization
-- **Version Control**: Track changes and allow rollbacks to previous versions
+- **Real AI Integration**: Connect to actual AI services for landing page generation (currently simulated)
+- **Full Vite Build Pipeline**: Implement actual npm install and Vite builds for production deployments
+- **Custom Domains**: Allow users to deploy on custom domains with DNS management
+- **Expanded Component Library**: Add Footer, Features, Testimonials, Gallery, Contact forms, etc.
+- **Component Variants**: Multiple styles for each component type (Navbar2, Layout2, etc.)
+- **Project Templates**: Pre-built templates and themes for different industries
+- **Advanced Visual Editor**: Drag-and-drop page builder with live preview
+- **Export Functionality**: Download generated pages as ZIP files with source code
+- **Team Collaboration**: Shared projects, user roles, and project permissions
+- **Analytics Dashboard**: Usage tracking, performance metrics, and conversion analytics
+- **Payment Integration**: Subscription plans, usage limits, and billing management
+- **SEO Optimization**: Meta tags, structured data, sitemap generation, and performance optimization
+- **Version Control**: Track changes, rollback capabilities, and change history
+- **A/B Testing**: Multiple page variants and performance comparison tools
 
 ### Developer Experience
 - **Testing Suite**: Comprehensive test coverage for authentication and deployment flows
