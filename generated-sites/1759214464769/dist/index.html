@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script>
+        // Simple React app rendering
+        const { useState, useEffect } = React;
+        
+        function Navbar({ logoSrc, button }) {
+            return React.createElement('nav', {
+                className: 'bg-white shadow-sm border-b border-gray-200'
+            }, React.createElement('div', {
+                className: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'
+            }, React.createElement('div', {
+                className: 'flex justify-between items-center h-16'
+            }, [
+                React.createElement('div', { className: 'flex items-center', key: 'logo' },
+                    React.createElement('img', { className: 'h-8 w-auto', src: logoSrc, alt: 'Logo' })
+                ),
+                React.createElement('div', { key: 'button' },
+                    React.createElement('button', {
+                        className: 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors'
+                    }, button)
+                )
+            ])));
+        }
+        
+        function HeroSection({ title, desc, button1, button2 }) {
+            return React.createElement('div', {
+                className: 'bg-white'
+            }, React.createElement('div', {
+                className: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20'
+            }, React.createElement('div', {
+                className: 'text-center'
+            }, [
+                React.createElement('h1', {
+                    className: 'text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl',
+                    key: 'title'
+                }, title),
+                React.createElement('p', {
+                    className: 'mt-6 max-w-3xl mx-auto text-xl text-gray-600',
+                    key: 'desc'
+                }, desc),
+                React.createElement('div', {
+                    className: 'mt-10 flex justify-center space-x-4',
+                    key: 'buttons'
+                }, [
+                    React.createElement('button', {
+                        className: 'bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors',
+                        key: 'btn1'
+                    }, button1),
+                    React.createElement('button', {
+                        className: 'bg-gray-200 hover:bg-gray-300 text-gray-900 px-8 py-3 rounded-lg font-semibold text-lg transition-colors',
+                        key: 'btn2'
+                    }, button2)
+                ])
+            ])));
+        }
+        
+        function App() {
+            return React.createElement('div', {
+                className: 'min-h-screen bg-white'
+            }, [
+                React.createElement(Navbar, {
+                    logoSrc: '/logo.png',
+                    button: 'Get Started',
+                    key: 'navbar'
+                }),
+                React.createElement(HeroSection, {
+                    title: 'Build Beautiful Landing Pages',
+                    desc: 'Create stunning landing pages with AI assistance. Fast, beautiful, and conversion-optimized.',
+                    button1: 'Get Started',
+                    button2: 'Learn More',
+                    key: 'hero'
+                })
+            ]);
+        }
+        
+        ReactDOM.render(React.createElement(App), document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -32,9 +32,10 @@ interface Project {
   updatedAt: string;
   landing_page_data?: LandingPageData;
   deployed?: boolean;
+  subdomain?: string;
 }
 
-let projects: Project[] = [];
+export let projects: Project[] = [];
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);

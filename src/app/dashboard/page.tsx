@@ -35,11 +35,13 @@ interface Project {
   updatedAt: string;
   landing_page_data?: LandingPageData;
   deployed?: boolean;
+  subdomain?: string;
 }
 
 export default function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deployingProjects, setDeployingProjects] = useState<Set<string>>(new Set());
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -83,6 +85,85 @@ export default function Dashboard() {
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/' });
+  };
+
+  const handleDeploy = async (projectId: string) => {
+    setDeployingProjects(prev => new Set([...prev, projectId]));
+    
+    try {
+      const response = await fetch(`/api/projects/${projectId}/deploy`, {
+        method: 'POST',
+      });
+      
+      if (response.ok) {
+        // Start polling for deployment status
+        pollDeploymentStatus(projectId);
+      } else {
+        console.error('Failed to start deployment');
+        setDeployingProjects(prev => {
+          const next = new Set(prev);
+          next.delete(projectId);
+          return next;
+        });
+      }
+    } catch (error) {
+      console.error('Error starting deployment:', error);
+      setDeployingProjects(prev => {
+        const next = new Set(prev);
+        next.delete(projectId);
+        return next;
+      });
+    }
+  };
+
+  const pollDeploymentStatus = async (projectId: string) => {
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/projects/${projectId}/deploy`);
+        if (response.ok) {
+          const status = await response.json();
+          
+          if (status.status === 'completed') {
+            // Update project in local state
+            setProjects(prev => prev.map(p => 
+              p.id === projectId 
+                ? { ...p, deployed: true, subdomain: status.subdomain }
+                : p
+            ));
+            setDeployingProjects(prev => {
+              const next = new Set(prev);
+              next.delete(projectId);
+              return next;
+            });
+            clearInterval(interval);
+          } else if (status.status === 'failed') {
+            console.error('Deployment failed');
+            setDeployingProjects(prev => {
+              const next = new Set(prev);
+              next.delete(projectId);
+              return next;
+            });
+            clearInterval(interval);
+          }
+        }
+      } catch (error) {
+        console.error('Error polling deployment status:', error);
+      }
+    }, 2000);
+
+    // Clear interval after 5 minutes
+    setTimeout(() => clearInterval(interval), 300000);
+  };
+
+  const getDeployedUrl = (project: Project) => {
+    if (process.env.NODE_ENV === 'development') {
+      // In development, use direct path access
+      return `/deployed/${project.subdomain}`;
+    } else {
+      // In production, use subdomain
+      const baseUrl = 'yourdomain.com';
+      return `http://${project.subdomain}.${baseUrl}`;
+    }
   };
 
   if (status === 'loading' || loading) {
@@ -219,11 +300,21 @@ export default function Dashboard() {
                             </button>
                           </Link>
                           {project.deployed ? (
-                            <button className="text-green-600 hover:text-green-700 text-sm font-medium">
-                              View
-                            </button>
+                            <a href={getDeployedUrl(project)} target="_blank" rel="noopener noreferrer">
+                              <button className="text-green-600 hover:text-green-700 text-sm font-medium">
+                                View
+                              </button>
+                            </a>
+                          ) : deployingProjects.has(project.id) ? (
+                            <div className="flex items-center space-x-1">
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-600"></div>
+                              <span className="text-purple-600 text-sm font-medium">Deploying...</span>
+                            </div>
                           ) : (
-                            <button className="text-purple-600 hover:text-purple-700 text-sm font-medium">
+                            <button 
+                              onClick={() => handleDeploy(project.id)}
+                              className="text-purple-600 hover:text-purple-700 text-sm font-medium"
+                            >
                               Deploy
                             </button>
                           )}
