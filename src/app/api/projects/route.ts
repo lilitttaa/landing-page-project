@@ -31,6 +31,7 @@ interface Project {
   createdAt: string;
   updatedAt: string;
   landing_page_data?: LandingPageData;
+  deployed?: boolean;
 }
 
 let projects: Project[] = [];

@@ -34,6 +34,7 @@ interface Project {
   createdAt: string;
   updatedAt: string;
   landing_page_data?: LandingPageData;
+  deployed?: boolean;
 }
 
 export default function Dashboard() {
@@ -212,14 +213,20 @@ export default function Dashboard() {
                       
                       {project.status === 'completed' ? (
                         <div className="flex space-x-2">
-                          <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                            Edit
-                          </button>
                           <Link href={`/preview/${project.id}`} target="_blank">
                             <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                              Preview
+                              Edit
                             </button>
                           </Link>
+                          {project.deployed ? (
+                            <button className="text-green-600 hover:text-green-700 text-sm font-medium">
+                              View
+                            </button>
+                          ) : (
+                            <button className="text-purple-600 hover:text-purple-700 text-sm font-medium">
+                              Deploy
+                            </button>
+                          )}
                         </div>
                       ) : (
                         <span className="text-sm text-gray-500">

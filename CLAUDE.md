@@ -77,8 +77,9 @@ src/
   - User-specific project cards with real-time status updates
   - Loading states with animated spinners for generating projects
   - Status badges (generating → completed with 3-second simulation)
-  - Actions (Edit/Preview for completed projects)
-  - Preview functionality opens generated landing pages in new tab
+  - Actions (Edit/Deploy for completed projects)
+  - Edit functionality opens generated landing pages for editing
+  - Deploy/View buttons based on deployment status (functionality pending)
 - **Empty State**: Call-to-action for users with no projects
 
 ### Authentication Pages
@@ -122,6 +123,7 @@ src/
 - **Real-Time Content**: Live preview of user-generated landing pages
 - **Responsive Design**: Mobile-first responsive components
 - **Error Handling**: Graceful fallbacks for missing data or components
+- **Edit Mode Access**: Accessible via Edit button from dashboard for project modification
 
 ## Data Flow & Security
 
@@ -162,7 +164,9 @@ src/
 4. User redirected to dashboard showing new project with loading spinner
 5. Server simulates generation (3 seconds) then updates status to "completed" with landing page data
 6. Dashboard polls and updates UI when project is ready
-7. User can click "Preview" to view generated landing page at `/preview/[id]`
+7. User can click "Edit" to modify the generated landing page at `/preview/[id]`
+8. User can click "Deploy" to publish the landing page (functionality pending)
+9. Once deployed, "Deploy" button changes to "View" button (functionality pending)
 
 ### Landing Page Generation & Rendering
 1. **Data Structure**: Projects include structured landing page data with sitemap, blocks, and content
@@ -286,6 +290,7 @@ interface Project {
   createdAt: string;
   updatedAt: string;
   landing_page_data?: LandingPageData;
+  deployed?: boolean;
 }
 ```
 
@@ -342,7 +347,11 @@ interface Layout1Props {
 - `POST /api/projects` - Create new project with landing page data generation (protected)
 
 ### Preview APIs
-- `GET /preview/[id]` - Server-side rendered landing page preview
+- `GET /preview/[id]` - Server-side rendered landing page preview and edit mode
+
+### Deployment APIs (Pending Implementation)
+- `POST /api/projects/[id]/deploy` - Deploy landing page (to be implemented)
+- `GET /api/projects/[id]/deployment` - Get deployment status (to be implemented)
 
 ### NextAuth.js APIs
 - `GET/POST /api/auth/[...nextauth]` - NextAuth.js handler
@@ -359,7 +368,7 @@ interface Layout1Props {
 
 ### UI Components
 - **Landing Page**: Auth-aware interface with dynamic states
-- **Dashboard**: Full web app layout with user profile and preview functionality
+- **Dashboard**: Full web app layout with user profile and deployment management
 - **Forms**: Comprehensive validation and error states
 - **Loading States**: Animated feedback for async operations
 
@@ -367,7 +376,8 @@ interface Layout1Props {
 - **Navbar1**: Responsive navigation bar with logo and CTA button
 - **Layout1**: Hero header section with title, description, and dual CTAs
 - **BlockRenderer**: Dynamic component mapper for rendering different block types
-- **Preview System**: Server-side rendered landing page previews
+- **Edit System**: Landing page editing through preview interface
+- **Deployment System**: Deploy/View buttons with status tracking (functionality pending)
 
 ### Backend Services
 - **UserService**: User management, validation, and password hashing
@@ -384,13 +394,15 @@ Based on server logs, all authentication flows and landing page generation are w
 - ✅ Project creation with landing page data (POST /api/projects 201)
 - ✅ Session management (GET /api/auth/session 200)
 - ✅ User logout (POST /api/auth/signout 200)
-- ✅ Landing page preview rendering (GET /preview/[id] 200)
+- ✅ Landing page edit mode rendering (GET /preview/[id] 200)
+- 🔄 Deployment functionality (pending implementation)
 
 ## Known Issues
 
 - **Development OAuth**: Google OAuth may have timeout errors with demo credentials (expected)
 - **In-Memory Storage**: Users and projects reset on server restart (database integration needed)
 - **Port Auto-detection**: Server automatically uses available ports (3000, 3001, 3002, etc.)
+- **Deployment Functionality**: Deploy and View buttons are placeholder UI (implementation pending)
 
 ## Future Enhancements
 
@@ -407,6 +419,8 @@ Based on server logs, all authentication flows and landing page generation are w
 
 ### Application Features
 - **Real AI Integration**: Connect to actual AI services for landing page generation
+- **Deployment System**: Implement actual deployment functionality for landing pages
+- **Custom Domains**: Allow users to deploy on custom domains
 - **More Component Types**: Expand beyond Navbar1 and Layout1 (Footer, Features, Testimonials, etc.)
 - **Project Templates**: Pre-built templates and themes
 - **Advanced Editor**: Visual page builder with drag-and-drop
@@ -415,7 +429,7 @@ Based on server logs, all authentication flows and landing page generation are w
 - **Analytics Dashboard**: Usage tracking and performance metrics
 - **Payment Integration**: Subscription plans and usage limits
 - **SEO Optimization**: Meta tags, structured data, and performance optimization
-- **Custom Domains**: Allow users to publish on custom domains
+- **Version Control**: Track changes and allow rollbacks to previous versions
 
 ### Developer Experience
 - **Testing Suite**: Comprehensive test coverage for authentication flows
