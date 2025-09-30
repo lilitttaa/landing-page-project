@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1759218000592",
+    "user_id": "1759202559741",
+    "description": "a",
+    "status": "completed",
+    "deployed": false,
+    "created_at": "2025-09-30T07:40:00.592Z",
+    "updated_at": "2025-09-30T07:40:03.597Z",
+    "name": "Landing Page #1759218000592",
+    "landing_page_data": {
+      "sitemap": [
+        "block_001",
+        "block_002"
+      ],
+      "blocks": {
+        "block_001": {
+          "type": "navbar",
+          "subtype": "Navbar1",
+          "content": "content_001"
+        },
+        "block_002": {
+          "type": "hero_header_section",
+          "subtype": "Layout1",
+          "content": "content_002"
+        }
+      },
+      "block_contents": {
+        "content_001": {
+          "logo_src": "/logo.png",
+          "button": "Get Started"
+        },
+        "content_002": {
+          "title": "Build Beautiful Landing Pages",
+          "desc": "Create stunning landing pages with AI assistance. Fast, beautiful, and conversion-optimized.",
+          "button1": "Get Started",
+          "button2": "Learn More"
+        }
+      }
+    }
+  }
+]

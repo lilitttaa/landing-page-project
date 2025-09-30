@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../auth/[...nextauth]/route';
 import { projectGenerator } from '../../../../../lib/projectGenerator';
-import { projects } from '../../route';
-
-// In-memory deployment status tracking
-const deploymentStatus = new Map<string, { status: 'deploying' | 'completed' | 'failed', subdomain?: string }>();
+import { ProjectService } from '../../../../../lib/projectService';
 
 export async function POST(
   request: NextRequest,
@@ -18,7 +15,7 @@ export async function POST(
   }
 
   const { id: projectId } = await params;
-  const project = projects.find(p => p.id === projectId && p.userId === session.user.id);
+  const project = ProjectService.getUserProject(projectId, session.user.id);
 
   if (!project) {
     return NextResponse.json({ error: 'Project not found' }, { status: 404 });
@@ -28,13 +25,13 @@ export async function POST(
     return NextResponse.json({ error: 'Project not ready for deployment' }, { status: 400 });
   }
 
-  // Set deployment status to deploying
-  deploymentStatus.set(projectId, { status: 'deploying' });
+  // 设置部署状态为deploying
+  ProjectService.setDeploymentStatus(projectId, 'deploying');
 
-  // Start deployment process asynchronously
+  // 开始异步部署过程
   deployProject(projectId, project.landing_page_data).catch(error => {
     console.error('Deployment failed:', error);
-    deploymentStatus.set(projectId, { status: 'failed' });
+    ProjectService.setDeploymentStatus(projectId, 'failed', undefined, error.message);
   });
 
   return NextResponse.json({ status: 'deploying' });
@@ -51,46 +48,42 @@ export async function GET(
   }
 
   const projectId = params.id;
-  const status = deploymentStatus.get(projectId);
+  const status = ProjectService.getDeploymentStatus(projectId);
 
   if (!status) {
     return NextResponse.json({ status: 'not_deployed' });
   }
 
-  return NextResponse.json(status);
+  return NextResponse.json({
+    status: status.status,
+    subdomain: status.subdomain,
+    error_message: status.error_message,
+  });
 }
 
 async function deployProject(projectId: string, landingPageData: any) {
   try {
-    // Generate the project
+    // 生成项目
     const projectPath = await projectGenerator.generateProject(projectId, landingPageData);
     
-    // Build the project
+    // 构建项目
     const distPath = await projectGenerator.buildProject(projectPath);
     
-    // Generate subdomain (for now, using project ID)
+    // 生成子域名
     const subdomain = `project-${projectId}`;
     
-    // Update deployment status
-    deploymentStatus.set(projectId, { 
-      status: 'completed', 
-      subdomain 
-    });
+    // 更新部署状态
+    ProjectService.setDeploymentStatus(projectId, 'completed', subdomain);
     
-    // Update the project in memory
-    const projectIndex = projects.findIndex(p => p.id === projectId);
-    if (projectIndex !== -1) {
-      projects[projectIndex] = {
-        ...projects[projectIndex],
-        deployed: true,
-        subdomain,
-        updatedAt: new Date().toISOString()
-      };
-    }
+    // 更新项目信息
+    ProjectService.updateProject(projectId, {
+      deployed: true,
+      subdomain,
+    });
     
     console.log(`Project ${projectId} deployed successfully to subdomain: ${subdomain}`);
   } catch (error) {
     console.error('Deployment error:', error);
-    deploymentStatus.set(projectId, { status: 'failed' });
+    ProjectService.setDeploymentStatus(projectId, 'failed', undefined, error instanceof Error ? error.message : 'Unknown error');
   }
 }
