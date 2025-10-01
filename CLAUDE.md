@@ -23,8 +23,9 @@ src/
 │   │   │   └── page.tsx           # Isolated editing environment (iframe content)
 │   │   └── layout.tsx             # Custom layout with isolated Tailwind config
 │   ├── preview-static/
-│   │   └── [id]/
-│   │       └── page.tsx           # Static preview mode (non-editable)
+│   │   ├── [id]/
+│   │   │   └── page.tsx           # Static preview mode (non-editable)
+│   │   └── layout.tsx             # Custom layout with identical Tailwind config as edit-frame
 │   ├── deployed/
 │   │   └── [subdomain]/
 │   │       └── page.tsx           # Deployed project viewer
@@ -170,7 +171,7 @@ middleware.ts                     # Subdomain routing middleware
 - **iframe Isolation Architecture**: Complete style and script isolation using iframe sandboxing
 - **Dual-Mode Interface**:
   - **Edit Mode**: iframe loads `/edit-frame/[id]` with custom Tailwind configuration
-  - **Preview Mode**: iframe loads `/preview-static/[id]` with standard styling
+  - **Preview Mode**: iframe loads `/preview-static/[id]` with identical styling for consistency
 - **Interactive Editing Toolbar**:
   - Mode toggle (Edit ↔ Preview)
   - Save changes functionality
@@ -180,19 +181,20 @@ middleware.ts                     # Subdomain routing middleware
   - Contextual edit tooltips on hover
   - Modal editing dialogs for text and image content
 - **PostMessage Communication**: Secure bidirectional communication between parent and iframe
-- **Custom Tailwind Integration**: Isolated Tailwind v4 configuration via CDN with custom theme
+- **Unified Styling System**: Both edit and preview modes use identical custom Tailwind configuration via CDN
 
 ### Page 4 - Isolated Edit Frame (`/edit-frame/[id]`)
 - **Complete Style Isolation**: Independent Tailwind configuration without affecting main app
 - **Server-Side Rendered Components**: Uses existing SSR system with BlockRenderer
 - **Interactive Elements**: All content marked as editable with visual feedback
 - **Communication Layer**: PostMessage API for edit requests and content updates
-- **Custom Layout**: Dedicated layout with isolated styling environment
+- **Custom Layout**: Dedicated layout with isolated styling environment using `tailwind.custom.config.js`
 
 ### Page 5 - Static Preview (`/preview-static/[id]`)
-- **Read-Only Mode**: Non-editable preview using standard application styling
-- **Performance Optimized**: Lightweight rendering without edit interaction overhead
-- **Consistent Rendering**: Uses same SSR components as main application
+- **Consistent Styling**: Uses identical custom Tailwind configuration as edit mode for perfect visual alignment
+- **Read-Only Mode**: Non-editable preview without edit interaction overhead
+- **Unified Layout**: Dedicated layout matching edit-frame styling system
+- **Performance Optimized**: Lightweight rendering with consistent visual appearance
 
 ### Page 6 - Deployed Projects (`/deployed/[subdomain]`)
 - **Independent Landing Pages**: Fully deployed React applications
@@ -694,7 +696,7 @@ interface Layout1Props {
   - Dual-mode interface (Edit/Preview) with toolbar controls
   - Real-time visual editing with click-to-edit functionality
   - PostMessage communication between parent and iframe
-  - Custom Tailwind configuration isolation
+  - Unified Tailwind configuration ensuring consistent styling between edit and preview modes
 - **Deployment System**: Full React project generation with Vite builds and subdomain routing
 - **User Interface**: Responsive dashboard with project cards, status tracking, and deployment controls
 - **Security**: bcrypt password hashing, session validation, and secure API endpoints
