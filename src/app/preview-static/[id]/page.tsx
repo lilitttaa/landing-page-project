@@ -103,7 +103,7 @@ export default function PreviewStatic() {
   const { landing_page_data } = project;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="preview-container min-h-screen bg-white">
       {landing_page_data.sitemap.map((blockId) => {
         const block = landing_page_data.blocks[blockId];
         const content = landing_page_data.block_contents[block.content];
