@@ -1,6 +1,6 @@
 # Landing Page Builder
 
-A Next.js 15.5.4 TypeScript application for creating and managing landing pages with AI assistance, featuring comprehensive authentication (Google OAuth + Email/Password), persistent JSON file-based data storage, and full deployment functionality with React project generation.
+A Next.js 15.5.4 TypeScript application for creating and managing landing pages with AI assistance, featuring comprehensive authentication (Google OAuth + Email/Password), persistent JSON file-based data storage, **iframe-based editing system with isolated styling**, and full deployment functionality with React project generation.
 
 ## Project Structure
 
@@ -17,7 +17,14 @@ src/
 │   │   └── page.tsx               # Protected dashboard with user projects
 │   ├── preview/
 │   │   └── [id]/
-│   │       └── page.tsx           # Landing page preview with SSR
+│   │       └── page.tsx           # iframe-based editing interface with toolbar
+│   ├── edit-frame/
+│   │   ├── [id]/
+│   │   │   └── page.tsx           # Isolated editing environment (iframe content)
+│   │   └── layout.tsx             # Custom layout with isolated Tailwind config
+│   ├── preview-static/
+│   │   └── [id]/
+│   │       └── page.tsx           # Static preview mode (non-editable)
 │   ├── deployed/
 │   │   └── [subdomain]/
 │   │       └── page.tsx           # Deployed project viewer
@@ -36,13 +43,26 @@ src/
 │   │       └── [...slug]/
 │   │           └── route.ts       # Static asset serving for deployed projects
 │   ├── layout.tsx                 # Root layout with session provider
-│   └── globals.css                # Global styles with Geist fonts
+│   └── globals.css                # Global styles with Tailwind CSS v4
 ├── components/
 │   ├── AuthProvider.tsx           # NextAuth session provider wrapper
-│   └── landing-page/
-│       ├── Navbar1.tsx            # Responsive navbar component
-│       ├── Layout1.tsx            # Hero header section component
-│       └── BlockRenderer.tsx      # Dynamic component renderer
+│   ├── landing-page/
+│   │   ├── Navbar1.tsx            # Advanced Relume-style navbar with animations
+│   │   ├── Layout1.tsx            # Enhanced hero section with image support
+│   │   └── BlockRenderer.tsx      # Dynamic component renderer
+│   ├── common/                    # Comprehensive UI component library
+│   │   ├── Button.tsx             # Multi-variant button component
+│   │   ├── Dialog.tsx             # Modal dialog system
+│   │   ├── Accordion.tsx          # Collapsible content sections
+│   │   ├── Carousel.tsx           # Image/content carousel with Embla
+│   │   ├── Sidebar.tsx            # Navigation sidebar component
+│   │   └── [20+ other components] # Complete UI component ecosystem
+│   └── utils/
+│       ├── cn.ts                  # Class name utility functions
+│       └── colorUtils.ts          # Color manipulation utilities
+├── config/
+│   ├── tailwind.custom.config.js  # Isolated Tailwind configuration for editing
+│   └── tailwind.utils.js          # Config utilities for reuse (editing + deploy)
 ├── lib/
 │   ├── userService.ts             # User management and authentication with database operations
 │   ├── projectService.ts          # Project management and CRUD operations
@@ -146,15 +166,35 @@ middleware.ts                     # Subdomain routing middleware
   - Duplicate email prevention
   - Secure password hashing before storage
 
-### Page 3 - Landing Page Preview (`/preview/[id]`)
-- **Server-Side Rendered Landing Pages**: Dynamic rendering of generated landing pages
-- **Component-Based Architecture**: Modular blocks rendered from structured data
-- **Real-Time Content**: Live preview of user-generated landing pages
-- **Responsive Design**: Mobile-first responsive components
-- **Error Handling**: Graceful fallbacks for missing data or components
-- **Edit Mode Access**: Accessible via Edit button from dashboard for project modification
+### Page 3 - Advanced iframe-based Editing System (`/preview/[id]`)
+- **iframe Isolation Architecture**: Complete style and script isolation using iframe sandboxing
+- **Dual-Mode Interface**:
+  - **Edit Mode**: iframe loads `/edit-frame/[id]` with custom Tailwind configuration
+  - **Preview Mode**: iframe loads `/preview-static/[id]` with standard styling
+- **Interactive Editing Toolbar**:
+  - Mode toggle (Edit ↔ Preview)
+  - Save changes functionality
+  - Close/exit controls
+- **Real-time Visual Editing**:
+  - Click-to-edit functionality with visual indicators
+  - Contextual edit tooltips on hover
+  - Modal editing dialogs for text and image content
+- **PostMessage Communication**: Secure bidirectional communication between parent and iframe
+- **Custom Tailwind Integration**: Isolated Tailwind v4 configuration via CDN with custom theme
 
-### Page 4 - Deployed Projects (`/deployed/[subdomain]`)
+### Page 4 - Isolated Edit Frame (`/edit-frame/[id]`)
+- **Complete Style Isolation**: Independent Tailwind configuration without affecting main app
+- **Server-Side Rendered Components**: Uses existing SSR system with BlockRenderer
+- **Interactive Elements**: All content marked as editable with visual feedback
+- **Communication Layer**: PostMessage API for edit requests and content updates
+- **Custom Layout**: Dedicated layout with isolated styling environment
+
+### Page 5 - Static Preview (`/preview-static/[id]`)
+- **Read-Only Mode**: Non-editable preview using standard application styling
+- **Performance Optimized**: Lightweight rendering without edit interaction overhead
+- **Consistent Rendering**: Uses same SSR components as main application
+
+### Page 6 - Deployed Projects (`/deployed/[subdomain]`)
 - **Independent Landing Pages**: Fully deployed React applications
 - **Optimized Performance**: Static HTML generation with CDN resources
 - **Responsive Design**: Mobile-first components with Tailwind CSS
@@ -348,10 +388,22 @@ interface DeploymentStatus {
 
 - **Framework**: Next.js 15.5.4 with App Router and Turbopack
 - **Language**: TypeScript with strict type checking
+- **Styling**: 
+  - **Main App**: Tailwind CSS v4 with native CSS variables
+  - **Edit Mode**: Isolated Tailwind configuration via CDN
+  - **Custom Theme**: Comprehensive design system with spacing, colors, typography
 - **Authentication**: 
   - NextAuth.js with Google OAuth and Credentials providers
   - bcryptjs for password hashing (12 salt rounds)
-- **Styling**: Tailwind CSS 4 with responsive design and Geist fonts
+- **UI Components**:
+  - **Radix UI**: Comprehensive component primitives (20+ components)
+  - **Framer Motion**: Advanced animations and transitions
+  - **React Icons**: Icon library integration
+  - **Embla Carousel**: Touch-friendly carousel system
+- **Editing System**:
+  - **iframe Isolation**: Complete style and script sandboxing
+  - **PostMessage API**: Secure parent-iframe communication
+  - **Visual Feedback**: Click-to-edit with hover states and tooltips
 - **State Management**: React useState + server-side session management
 - **API**: Next.js API routes with comprehensive session validation
 - **Build System**: Vite 4 with SWC for deployed project builds
@@ -368,7 +420,14 @@ interface DeploymentStatus {
   "react-dom": "19.1.0",
   "next-auth": "^4.24.11",
   "bcryptjs": "^3.0.2",
-  "tailwindcss": "^4"
+  "tailwindcss": "^4",
+  "@radix-ui/react-*": "^1.x.x",
+  "framer-motion": "^12.23.22",
+  "react-icons": "^5.5.0",
+  "embla-carousel-react": "^8.6.0",
+  "class-variance-authority": "^0.7.1",
+  "clsx": "^2.1.1",
+  "tailwind-merge": "^3.3.1"
 }
 ```
 
@@ -492,25 +551,51 @@ interface Project {
 }
 ```
 
-### Landing Page Components
+### Landing Page Components (Enhanced with Relume Integration)
 
-#### Navbar1 Component
+#### Navbar1 Component (Advanced)
 ```typescript
 interface Navbar1Props {
-  logo_src: string;
-  button: string;
+  logo: {
+    url?: string;
+    src: string;
+    alt?: string;
+  };
+  navLinks: {
+    url: string;
+    title: string;
+    subMenuLinks?: { url: string; title: string; }[];
+  }[];
+  buttons: ButtonProps[];
 }
 ```
 
-#### Layout1 Component  
+#### Layout1 Component (Enhanced)  
 ```typescript
 interface Layout1Props {
-  title: string;
-  desc: string;
-  button1: string;
-  button2: string;
+  tagline: string;
+  heading: string;
+  description: string;
+  buttons: ButtonProps[];
+  image: {
+    src: string;
+    alt?: string;
+  };
 }
 ```
+
+### UI Component Library (`src/components/common/`)
+- **Button**: Multi-variant button with size and style options
+- **Dialog**: Modal system with overlay and focus management
+- **Accordion**: Collapsible content with animations
+- **Carousel**: Image/content carousel using Embla Carousel
+- **Sidebar**: Navigation sidebar with responsive behavior
+- **Checkbox/RadioGroup**: Form input components with validation
+- **Select/Input/Textarea**: Form controls with consistent styling
+- **Badge/Separator**: UI accent and layout components
+- **Tooltip/Sheet**: Interactive overlay components
+- **Tabs/Pagination**: Navigation and content organization
+- **Switch**: Toggle controls with animations
 
 ## Security Features
 
@@ -600,17 +685,28 @@ interface Layout1Props {
 - **Authentication System**: Multi-provider login (Google OAuth + Email/Password) with persistent sessions
 - **Data Persistence**: JSON file-based database with user accounts, projects, and deployment status
 - **Project Management**: Complete CRUD operations with user isolation and real-time status updates
-- **Landing Page Generation**: Component-based rendering system with Navbar1 and Layout1 components
+- **Advanced Component System**: 
+  - Enhanced Navbar1 and Layout1 with complex prop structures
+  - Comprehensive UI component library (20+ Radix UI components)
+  - Framer Motion animations and micro-interactions
+- **iframe-based Editing System**:
+  - Complete style isolation using iframe sandboxing
+  - Dual-mode interface (Edit/Preview) with toolbar controls
+  - Real-time visual editing with click-to-edit functionality
+  - PostMessage communication between parent and iframe
+  - Custom Tailwind configuration isolation
 - **Deployment System**: Full React project generation with Vite builds and subdomain routing
 - **User Interface**: Responsive dashboard with project cards, status tracking, and deployment controls
 - **Security**: bcrypt password hashing, session validation, and secure API endpoints
 
 ### 🔄 In Progress
-- **Component Library Expansion**: Adding more landing page components and templates
-- **AI Integration**: Connecting to actual AI services for landing page content generation
-- **Performance Optimization**: Query optimization and caching strategies
+- **Save Functionality**: Persistent content updates from edit mode to database
+- **Advanced Component Editor**: Rich editing interface for complex component properties
+- **Performance Optimization**: Caching strategies for iframe content and component rendering
 
 ### 📋 Planned Enhancements
+- **Component Library Expansion**: Additional Relume-style components and templates
+- **AI Integration**: Connecting to actual AI services for landing page content generation
 - **Database Migration**: Upgrade path to SQLite/PostgreSQL for production scaling
 - **Advanced Features**: Custom domains, team collaboration, analytics dashboard
 - **Developer Tools**: Comprehensive testing, API documentation, deployment automation
@@ -620,9 +716,10 @@ interface Layout1Props {
 - **Development OAuth**: Google OAuth may have timeout errors with demo credentials (expected behavior)
 - **JSON File Storage**: Suitable for small to medium scale applications (< 10,000 users)
 - **Port Auto-detection**: Server automatically uses available ports (3000, 3001, 3003, etc.)
-- **Simplified Build Process**: Currently using HTML generation with CDN resources instead of full Vite builds for development speed
-- **Component Library**: Limited to Navbar1 and Layout1 components (expandable architecture in place)
-- **Asset Serving**: Static assets served through API routes rather than dedicated CDN in development
+- **Save Functionality**: Edit changes are visual-only, not yet persisted to database
+- **Component Library**: Currently optimized for Navbar1 and Layout1, expandable architecture in place
+- **iframe Performance**: Slight rendering overhead due to dual-environment architecture
+- **Complex Property Editing**: Advanced component properties (arrays, objects) need enhanced UI
 - **Concurrent Access**: JSON file writes are atomic but not optimized for high-concurrency scenarios
 
 ## Future Enhancements
