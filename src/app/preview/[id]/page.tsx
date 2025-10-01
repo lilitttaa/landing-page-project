@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import BlockRenderer from '@/components/landing-page/BlockRenderer';
 
 interface LandingPageBlock {
   type: string;
@@ -41,6 +40,9 @@ export default function LandingPagePreview() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(true); // 默认开启编辑模式
+  const [editingElement, setEditingElement] = useState<any>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -69,6 +71,43 @@ export default function LandingPagePreview() {
       fetchProject();
     }
   }, [projectId]);
+
+  // 处理来自iframe的编辑请求
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'EDIT_REQUEST') {
+        const { elementType, elementPath, currentValue, position } = event.data.payload;
+        setEditingElement({
+          type: elementType,
+          path: elementPath,
+          value: currentValue,
+          position
+        });
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  // 处理内容更新
+  const handleContentUpdate = (newValue: string) => {
+    if (!editingElement || !iframeRef.current) return;
+
+    // 向iframe发送更新消息
+    iframeRef.current.contentWindow?.postMessage({
+      type: 'UPDATE_CONTENT',
+      payload: {
+        elementPath: editingElement.path,
+        newValue
+      }
+    }, '*');
+
+    // TODO: 这里应该调用API更新项目数据
+    // updateProjectContent(projectId, editingElement.path, newValue);
+
+    setEditingElement(null);
+  };
 
   if (loading) {
     return (
@@ -103,20 +142,123 @@ export default function LandingPagePreview() {
   const { landing_page_data } = project;
 
   return (
-    <div className="min-h-screen bg-white">
-      {landing_page_data.sitemap.map((blockId) => {
-        const block = landing_page_data.blocks[blockId];
-        const content = landing_page_data.block_contents[block.content];
+    <div className="relative min-h-screen bg-gray-100">
+      {/* 编辑模式工具栏 */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <h1 className="text-lg font-semibold">Edit Mode</h1>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setIsEditMode(!isEditMode)}
+              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                isEditMode 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {isEditMode ? 'Exit Edit' : 'Edit Mode'}
+            </button>
+          </div>
+        </div>
         
-        return (
-          <BlockRenderer
-            key={blockId}
-            type={block.type}
-            subtype={block.subtype}
-            content={content}
+        <div className="flex items-center space-x-2">
+          <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+            Save Changes
+          </button>
+          <button 
+            onClick={() => window.close()}
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+
+      {/* iframe容器 */}
+      <div className="pt-16 h-screen">
+        {isEditMode ? (
+          <iframe
+            ref={iframeRef}
+            src={`/edit-frame/${projectId}`}
+            className="w-full h-full border-0"
+            title="Edit Mode"
           />
-        );
-      })}
+        ) : (
+          <iframe
+            src={`/preview-static/${projectId}`}
+            className="w-full h-full border-0"
+            title="Preview Mode"
+          />
+        )}
+      </div>
+
+      {/* 编辑弹窗 */}
+      {editingElement && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-[90vw]">
+            <h3 className="text-lg font-semibold mb-4">
+              Edit {editingElement.type}
+            </h3>
+            
+            {editingElement.type === 'image' ? (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Image URL
+                </label>
+                <input
+                  type="url"
+                  defaultValue={editingElement.value}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleContentUpdate((e.target as HTMLInputElement).value);
+                    }
+                  }}
+                  placeholder="Enter image URL"
+                />
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Text Content
+                </label>
+                <textarea
+                  defaultValue={editingElement.value}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={4}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                      handleContentUpdate((e.target as HTMLTextAreaElement).value);
+                    }
+                  }}
+                />
+              </div>
+            )}
+            
+            <div className="flex justify-end space-x-2 mt-4">
+              <button
+                onClick={() => setEditingElement(null)}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const input = editingElement.type === 'image' 
+                    ? document.querySelector('input[type="url"]') as HTMLInputElement
+                    : document.querySelector('textarea') as HTMLTextAreaElement;
+                  if (input) {
+                    handleContentUpdate(input.value);
+                  }
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

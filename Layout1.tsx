@@ -1,5 +1,5 @@
-import { Button } from "../common";
-import type { ButtonProps } from "../common";
+import { Button } from "@relume_io/relume-ui";
+import type { ButtonProps } from "@relume_io/relume-ui";
 import { RxChevronRight } from "react-icons/rx";
 
 type ImageProps = {
@@ -68,5 +68,3 @@ export const Layout1Defaults: Props = {
     alt: "Relume placeholder image",
   },
 };
-
-export default Layout1;

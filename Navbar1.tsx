@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button, useMediaQuery } from "../common";
-import type { ButtonProps } from "../common";
+import { Button, useMediaQuery } from "@relume_io/relume-ui";
+import type { ButtonProps } from "@relume_io/relume-ui";
 import { AnimatePresence, motion } from "framer-motion";
 import { RxChevronDown } from "react-icons/rx";
 
@@ -248,5 +248,3 @@ const bottomLineVariants = {
     transition: { duration: 0.2 },
   },
 };
-
-export default Navbar1;

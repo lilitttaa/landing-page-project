@@ -29,7 +29,7 @@ export default async function DeployedProjectPage({ params }: PageProps) {
     // Replace relative paths with absolute paths for assets
     const baseUrl = process.env.NODE_ENV === 'production' 
       ? `https://${subdomain}.yourdomain.com` 
-      : `http://${subdomain}.localhost:3003`;
+      : `http://${subdomain}.localhost:3000`;
     
     // Update asset paths to point to our API endpoint
     html = html.replace(

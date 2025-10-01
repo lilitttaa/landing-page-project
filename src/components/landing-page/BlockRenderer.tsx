@@ -1,5 +1,5 @@
-import Navbar1 from './Navbar1';
-import Layout1 from './Layout1';
+import { Navbar1 } from './Navbar1';
+import { Layout1 } from './Layout1';
 
 const componentMap = {
   Navbar1,
