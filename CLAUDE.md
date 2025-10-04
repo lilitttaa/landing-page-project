@@ -206,28 +206,36 @@ middleware.ts                     # Subdomain routing middleware
 ## Deployment System
 
 ### Project Generation Engine
-- **React+TypeScript+Tailwind Template**: Complete project template with modern tooling
-- **Dynamic Component Generation**: Converts landing page data into React components
-- **Component Adaptation**: Automatically adapts components from main app to standalone versions
-- **Vite Build System**: Fast development and optimized production builds
-- **Asset Optimization**: Automatic asset bundling and optimization
+- **React+TypeScript+Tailwind Template**: Complete project template with modern tooling and comprehensive dependencies
+- **Configuration-Driven Component Cloning**: Universal system that intelligently extracts and adapts components from main app
+- **Smart Dependency Detection**: Automatic scanning and import generation for external libraries (React Icons, Framer Motion, etc.)
+- **Vite Build System**: Fast development and optimized production builds with relaxed TypeScript strictness
+- **Asset Optimization**: Automatic asset bundling and optimization with CDN fallback support
 
 ### Build Process
-1. **Template Copying**: Copies base React project template from `/template` directory
-2. **Component Generation**: Creates React components from landing page data structure
-3. **Component Adaptation**: Transforms main app components (Navbar1, Layout1) to standalone versions
-4. **Build Compilation**: Generates optimized static HTML with CDN resources for browser compatibility
-5. **Asset Management**: Handles static assets with proper caching headers
+1. **Template Copying**: Copies base React project template from `/template` directory with full dependency stack
+2. **Universal Component Cloning**: Extracts needed components (Navbar1, Layout1) preserving original names and structures
+3. **Smart Import Resolution**: Automatically detects JSX usage and generates missing import statements for external dependencies
+4. **Dependency Adaptation**: Maps external libraries through configuration-driven system (react-icons, framer-motion, colord)
+5. **Build Compilation**: Dual-path compilation (Vite build with fallback to optimized static HTML generation)
+6. **Asset Management**: Handles static assets with proper caching headers and CDN resources
 
-### Component Transformation Process
-- **Navbar1 → Navbar**: Interface renaming (`Navbar1Props` → `NavbarProps`), prop mapping (`logo_src` → `logoSrc`)
-- **Layout1 → HeroSection**: Interface transformation (`Layout1Props` → `HeroSectionProps`), export name changes
-- **Dynamic Import Mapping**: Generates proper component imports in App.tsx based on landing page structure
+### Configuration-Driven Dependency System
+- **External Library Mappings**: Configurable system for handling react-icons, framer-motion, and other external dependencies
+- **Intelligent Import Detection**: JSX-based scanning that only imports actually used components (avoids false positives)
+- **Category-Based Icon Grouping**: Automatically groups React Icons by category (rx, bi, io5, etc.) for optimal imports
+- **Global Type Generation**: Dynamic TypeScript declaration generation based on detected dependencies
+- **Component Name Preservation**: Maintains original component names (Navbar1, Layout1) throughout entire pipeline
+
+### Data Format Compatibility
+- **Dual Format Support**: Handles both legacy (`logo_src`, `button`) and modern (`logo: {url, src, alt}`) data structures
+- **Automatic Prop Conversion**: Intelligent conversion between data formats with proper JSX serialization
+- **Backward Compatibility**: Seamless migration path for existing projects with different data schemas
 
 ### Access Methods
 - **Development Environment**: 
-  - Main app: `http://localhost:3003`
-  - Deployed projects: `http://localhost:3003/deployed/project-{id}`
+  - Main app: `http://localhost:3000` (auto-detects available port)
+  - Deployed projects: `http://localhost:3000/deployed/project-{id}`
 - **Production Environment**:
   - Main app: `https://yourdomain.com`
   - Deployed projects: `https://project-{id}.yourdomain.com` (via middleware subdomain routing)
@@ -236,22 +244,27 @@ middleware.ts                     # Subdomain routing middleware
 ```
 generated-sites/[projectId]/
 ├── dist/                         # Built static files
-│   └── index.html               # Standalone HTML with CDN resources
+│   └── index.html               # Standalone HTML with CDN resources or Vite build output
 ├── src/
-│   ├── App.tsx                  # Generated app component
+│   ├── App.tsx                  # Generated app component with proper imports
+│   ├── global.d.ts              # Auto-generated TypeScript declarations
 │   └── components/
-│       ├── Navbar.tsx           # Adapted from Navbar1
-│       └── HeroSection.tsx      # Adapted from Layout1
-├── package.json                 # React 18 + Vite 4 dependencies
+│       ├── Navbar1.tsx          # Original component with smart imports
+│       ├── Layout1.tsx          # Original component with smart imports
+│       ├── common/              # Complete UI component library
+│       └── utils/               # Utility functions and helpers
+├── package.json                 # React 18 + Vite 4 + full Radix UI dependencies
+├── tsconfig.json                # Relaxed TypeScript configuration
 └── vite.config.ts               # SWC build configuration
 ```
 
 ### Deployment Features
 - **Progress Tracking**: Real-time deployment status with UI feedback using polling mechanism
 - **Asynchronous Processing**: Non-blocking deployment with status tracking via Map storage
-- **Error Handling**: Comprehensive error handling and user feedback
+- **Comprehensive Error Handling**: TypeScript compilation error resolution and user feedback
 - **Resource Independence**: All assets load correctly in any environment via CDN resources
 - **Subdomain Routing**: Middleware-based routing for both development paths and production subdomains
+- **Next.js 15 Compatibility**: Full support for Next.js 15 async params and modern features
 
 ## Data Storage & Persistence
 
@@ -697,7 +710,14 @@ interface Layout1Props {
   - Real-time visual editing with click-to-edit functionality
   - PostMessage communication between parent and iframe
   - Unified Tailwind configuration ensuring consistent styling between edit and preview modes
-- **Deployment System**: Full React project generation with Vite builds and subdomain routing
+- **Production-Ready Deployment System**: 
+  - **Configuration-Driven Component Cloning**: Universal system supporting hundreds of components
+  - **Smart Dependency Resolution**: Automatic import detection and generation for external libraries
+  - **Next.js 15 Compatibility**: Full async params support and modern features
+  - **Dual Data Format Support**: Seamless handling of legacy and modern prop structures
+  - **Comprehensive Error Handling**: TypeScript compilation error resolution with relaxed build strictness
+  - **Full Radix UI Integration**: Complete component library with proper dependency management
+  - **Vite Build System**: Fast compilation with CDN fallback for maximum compatibility
 - **User Interface**: Responsive dashboard with project cards, status tracking, and deployment controls
 - **Security**: bcrypt password hashing, session validation, and secure API endpoints
 
@@ -707,7 +727,7 @@ interface Layout1Props {
 - **Performance Optimization**: Caching strategies for iframe content and component rendering
 
 ### 📋 Planned Enhancements
-- **Component Library Expansion**: Additional Relume-style components and templates
+- **Component Library Expansion**: Additional Relume-style components and templates with automatic clone support
 - **AI Integration**: Connecting to actual AI services for landing page content generation
 - **Database Migration**: Upgrade path to SQLite/PostgreSQL for production scaling
 - **Advanced Features**: Custom domains, team collaboration, analytics dashboard
