@@ -39,7 +39,7 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   
@@ -47,7 +47,7 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const projectId = params.id;
+  const { id: projectId } = await params;
   const status = ProjectService.getDeploymentStatus(projectId);
 
   if (!status) {

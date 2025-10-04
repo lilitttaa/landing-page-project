@@ -13,7 +13,7 @@ export * from "./RadioGroup";
 export * from "./Select";
 export * from "./Separator";
 export * from "./Sheet";
-export * from "./Sidebar";
+// export * from "./Sidebar";
 export * from "./Switch";
 export * from "./Tabs";
 export * from "./Textarea";

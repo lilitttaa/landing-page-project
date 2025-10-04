@@ -4,7 +4,7 @@ import * as React from "react";
 import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
 import { BiRightArrowAlt, BiLeftArrowAlt } from "react-icons/bi";
 import { cn } from "../utils/cn";
-import { Button } from "../Common/Button";
+import { Button } from "../common/Button";
 
 // import { cn } from "../utils/cn";
 // import { Button } from "../Button/Button";
