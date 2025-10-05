@@ -1,4 +1,5 @@
 export * from "./Accordion";
+export * from "./ArrayEditor";
 export * from "./Badge";
 export * from "./Breadcrumb";
 export * from "./Button";
@@ -8,6 +9,7 @@ export * from "./Dialog";
 export * from "./DropdownMenu";
 export * from "./Input";
 export * from "./Label";
+export * from "./NavLinksEditor";
 export * from "./Pagination";
 export * from "./RadioGroup";
 export * from "./Select";

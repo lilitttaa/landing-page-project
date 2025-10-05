@@ -258,6 +258,89 @@ export default function LandingPagePreview() {
     }, 100);
   }, [canRedo, historyState.future.length]);
 
+  // Array editing handlers
+  const handleArrayInsert = useCallback((blockId: string, arrayPath: string, index: number, position: { x: number, y: number }) => {
+    if (!currentData) return;
+
+    // Get the array to determine the type of item to create
+    const block = currentData.blocks[blockId];
+    if (!block || !currentData.block_contents[block.content]) return;
+
+    let current = currentData.block_contents[block.content];
+    const keys = arrayPath.split('.');
+    for (let i = 0; i < keys.length; i++) {
+      if (i === keys.length - 1) {
+        // This is the array
+        if (Array.isArray(current[keys[i]])) {
+          const array = current[keys[i]];
+          let newItem: any;
+
+          // Create new item based on array type
+          if (array.length > 0) {
+            // Clone the first item as template
+            const template = array[0];
+            if (typeof template === 'object' && template !== null) {
+              newItem = JSON.parse(JSON.stringify(template));
+              // Reset text values
+              resetObjectTextValues(newItem);
+            } else {
+              newItem = typeof template === 'string' ? 'New Item' : template;
+            }
+          } else {
+            // Default items for common array types
+            if (arrayPath.includes('navLinks')) {
+              newItem = { title: 'New Link', url: '#' };
+            } else if (arrayPath.includes('buttons')) {
+              newItem = { title: 'New Button', variant: 'primary', size: 'primary' };
+            } else if (arrayPath.includes('subMenuLinks')) {
+              newItem = { title: 'New Menu Item', url: '#' };
+            } else {
+              newItem = 'New Item';
+            }
+          }
+
+          // Send the new item to iframe
+          iframeRef.current?.contentWindow?.postMessage({
+            type: 'ARRAY_INSERT_RESPONSE',
+            payload: {
+              blockId,
+              arrayPath,
+              index,
+              newItem
+            }
+          }, '*');
+        }
+      } else {
+        current = current[keys[i]];
+      }
+    }
+  }, [currentData]);
+
+  const handleArrayDelete = useCallback((blockId: string, arrayPath: string, index: number, position: { x: number, y: number }) => {
+    if (!currentData) return;
+
+    // Send delete request to iframe
+    iframeRef.current?.contentWindow?.postMessage({
+      type: 'ARRAY_DELETE_RESPONSE',
+      payload: {
+        blockId,
+        arrayPath,
+        index
+      }
+    }, '*');
+  }, [currentData]);
+
+  // Helper function to reset text values in cloned objects
+  const resetObjectTextValues = (obj: any, prefix = '') => {
+    for (const key in obj) {
+      if (typeof obj[key] === 'string' && key !== 'url' && key !== 'variant' && key !== 'size') {
+        obj[key] = `New ${key.charAt(0).toUpperCase() + key.slice(1)}`;
+      } else if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+        resetObjectTextValues(obj[key], key);
+      }
+    }
+  };
+
   const saveProject = async (data: LandingPageData, isManual = false) => {
     if (!projectId) return;
     setSaveStatus('saving');
@@ -298,6 +381,12 @@ export default function LandingPagePreview() {
           url: currentUrl,
           position
         });
+      } else if (event.data.type === 'ARRAY_INSERT_REQUEST') {
+        const { blockId, arrayPath, index, position } = event.data.payload;
+        handleArrayInsert(blockId, arrayPath, index, position);
+      } else if (event.data.type === 'ARRAY_DELETE_REQUEST') {
+        const { blockId, arrayPath, index, position } = event.data.payload;
+        handleArrayDelete(blockId, arrayPath, index, position);
       } else if (event.data.type === 'DATA_UPDATE') {
         const newData = event.data.payload;
         updateData(newData); // 直接记录到历史
