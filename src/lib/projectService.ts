@@ -1,6 +1,9 @@
 import { db, Project, DeploymentStatus } from './database';
+import { ComponentDataValidator } from './componentDataValidator';
 
 export class ProjectService {
+  private static validator = new ComponentDataValidator();
+
   static createProject(userId: string, description: string): Project {
     try {
       const newProject: Project = {
@@ -27,7 +30,9 @@ export class ProjectService {
 
   static getUserProjects(userId: string): Project[] {
     try {
-      return db.findUserProjects(userId);
+      const projects = db.findUserProjects(userId);
+      // 为每个项目校验和合并数据
+      return projects.map(project => this.validateAndMergeProjectData(project));
     } catch (error) {
       console.error('Error getting user projects:', error);
       return [];
@@ -36,7 +41,11 @@ export class ProjectService {
 
   static getProjectById(projectId: string): Project | null {
     try {
-      return db.findProjectById(projectId);
+      const project = db.findProjectById(projectId);
+      if (!project) return null;
+      
+      // 校验和合并数据
+      return this.validateAndMergeProjectData(project);
     } catch (error) {
       console.error('Error getting project by id:', error);
       return null;
@@ -47,7 +56,7 @@ export class ProjectService {
     try {
       const project = db.findProjectById(projectId);
       if (project && project.user_id === userId) {
-        return project;
+        return this.validateAndMergeProjectData(project);
       }
       return null;
     } catch (error) {
@@ -58,6 +67,11 @@ export class ProjectService {
 
   static updateProject(projectId: string, updates: Partial<Project>): boolean {
     try {
+      // 如果更新包含 landing_page_data，先进行校验
+      if (updates.landing_page_data) {
+        updates.landing_page_data = this.validateAndMergeLandingPageData(updates.landing_page_data);
+      }
+      
       return db.updateProject(projectId, updates);
     } catch (error) {
       console.error('Error updating project:', error);
@@ -81,7 +95,8 @@ export class ProjectService {
       if (additionalData) {
         if (additionalData.name) updates.name = additionalData.name;
         if (additionalData.landing_page_data) {
-          updates.landing_page_data = additionalData.landing_page_data;
+          // 校验和合并 landing page data
+          updates.landing_page_data = this.validateAndMergeLandingPageData(additionalData.landing_page_data);
         }
         if (additionalData.deployed !== undefined) {
           updates.deployed = additionalData.deployed;
@@ -139,5 +154,67 @@ export class ProjectService {
       console.error('Error deleting project:', error);
       return false;
     }
+  }
+
+  /**
+   * 校验和合并项目的 landing page data
+   */
+  private static validateAndMergeProjectData(project: Project): Project {
+    if (!project.landing_page_data) {
+      return project;
+    }
+
+    try {
+      const validatedData = this.validateAndMergeLandingPageData(project.landing_page_data);
+      return {
+        ...project,
+        landing_page_data: validatedData
+      };
+    } catch (error) {
+      console.warn(`Failed to validate project ${project.id} data:`, error);
+      return project; // 返回原始数据作为后备
+    }
+  }
+
+  /**
+   * 校验和合并 landing page data 中每个组件的数据
+   */
+  private static validateAndMergeLandingPageData(landingPageData: any): any {
+    if (!landingPageData || !landingPageData.sitemap || !landingPageData.blocks || !landingPageData.block_contents) {
+      return landingPageData;
+    }
+
+    const validatedData = JSON.parse(JSON.stringify(landingPageData)); // 深拷贝
+
+    // 遍历每个 block 并校验其内容
+    for (const blockId of validatedData.sitemap) {
+      const block = validatedData.blocks[blockId];
+      if (!block) continue;
+
+      const contentId = block.content;
+      const content = validatedData.block_contents[contentId];
+      if (!content) continue;
+
+      try {
+        // 使用组件名（subtype）进行校验
+        const componentName = block.subtype;
+        
+        // 校验数据
+        const validationResult = this.validator.validateComponentData(componentName, content);
+        
+        if (!validationResult.isValid && process.env.NODE_ENV === 'development') {
+          console.warn(`Validation errors for ${componentName} in block ${blockId}:`, validationResult.errors);
+        }
+
+        // 合并默认值
+        validatedData.block_contents[contentId] = this.validator.mergeWithDefaults(componentName, content);
+        
+      } catch (error) {
+        console.warn(`Failed to validate component ${block.subtype} in block ${blockId}:`, error);
+        // 保持原始内容
+      }
+    }
+
+    return validatedData;
   }
 }

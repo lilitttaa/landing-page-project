@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import BlockRenderer from '@/components/landing-page/BlockRenderer';
+import ValidatedBlockRenderer from '@/components/renderers/ValidatedBlockRenderer';
 
 interface LandingPageBlock {
   type: string;
@@ -217,7 +217,7 @@ export default function EditFrame() {
         const content = landing_page_data.block_contents[block.content];
         
         return (
-          <BlockRenderer
+          <ValidatedBlockRenderer
             key={blockId}
             type={block.type}
             subtype={block.subtype}

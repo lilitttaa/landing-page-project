@@ -1,0 +1,137 @@
+{
+  "componentName": "Navbar1",
+  "version": "1.0.0",
+  "properties": {
+    "logo": {
+      "type": "object",
+      "required": true
+    },
+    "navLinks": {
+      "type": "array",
+      "arrayItemType": {
+        "type": "object"
+      },
+      "required": true
+    },
+    "buttons": {
+      "type": "array",
+      "arrayItemType": {
+        "type": "object"
+      },
+      "required": true
+    }
+  },
+  "types": {
+    "ImageProps": {
+      "url": {
+        "type": "string",
+        "required": false
+      },
+      "src": {
+        "type": "string",
+        "required": true
+      },
+      "alt": {
+        "type": "string",
+        "required": false
+      }
+    },
+    "SubNavLink": {
+      "url": {
+        "type": "string",
+        "required": true
+      },
+      "title": {
+        "type": "string",
+        "required": true
+      }
+    },
+    "NavLink": {
+      "url": {
+        "type": "string",
+        "required": true
+      },
+      "title": {
+        "type": "string",
+        "required": true
+      },
+      "subMenuLinks": {
+        "type": "array",
+        "arrayItemType": {
+          "type": "object"
+        },
+        "required": false
+      }
+    },
+    "Props": {
+      "logo": {
+        "type": "object",
+        "required": true
+      },
+      "navLinks": {
+        "type": "array",
+        "arrayItemType": {
+          "type": "object"
+        },
+        "required": true
+      },
+      "buttons": {
+        "type": "array",
+        "arrayItemType": {
+          "type": "object"
+        },
+        "required": true
+      }
+    }
+  },
+  "defaults": {
+    "logo": {
+      "url": "#",
+      "src": "https://d22po4pjz3o32e.cloudfront.net/logo-image.svg",
+      "alt": "Logo image"
+    },
+    "navLinks": [
+      {
+        "title": "Link One",
+        "url": "#"
+      },
+      {
+        "title": "Link Two",
+        "url": "#"
+      },
+      {
+        "title": "Link Three",
+        "url": "#"
+      },
+      {
+        "title": "Link Four",
+        "url": "#",
+        "subMenuLinks": [
+          {
+            "title": "Link Five",
+            "url": "#"
+          },
+          {
+            "title": "Link Six",
+            "url": "#"
+          },
+          {
+            "title": "Link Seven",
+            "url": "#"
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "title": "Button",
+        "variant": "secondary",
+        "size": "sm"
+      },
+      {
+        "title": "Button",
+        "size": "sm"
+      }
+    ]
+  }
+}

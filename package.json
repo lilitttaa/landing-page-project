@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate-meta": "npx tsx scripts/generate-meta.ts",
+    "test-validation": "npx tsx scripts/test-validation.ts",
+    "clean-data": "npx tsx scripts/clean-project-data.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.12",

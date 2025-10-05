@@ -1,5 +1,5 @@
-import { Navbar1 } from './Navbar1';
-import { Layout1 } from './Layout1';
+import { Navbar1 } from '../landing-page/Navbar1';
+import { Layout1 } from '../landing-page/Layout1';
 
 const componentMap = {
   Navbar1,
@@ -12,7 +12,7 @@ interface BlockRendererProps {
   content: any;
 }
 
-export default function BlockRenderer({ type, subtype, content }: BlockRendererProps) {
+export default function ValidatedBlockRenderer({ type, subtype, content }: BlockRendererProps) {
   const Component = componentMap[subtype as keyof typeof componentMap];
   
   if (!Component) {
@@ -22,6 +22,7 @@ export default function BlockRenderer({ type, subtype, content }: BlockRendererP
       </div>
     );
   }
-  
+
+  // 直接使用传入的内容，假设服务端已经进行了校验和合并
   return <Component {...content} />;
 }

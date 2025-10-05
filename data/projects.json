@@ -33,9 +33,18 @@
             "alt": "Logo image"
           },
           "navLinks": [
-            { "title": "Features", "url": "#" },
-            { "title": "Pricing", "url": "#" },
-            { "title": "About", "url": "#" }
+            {
+              "title": "Features",
+              "url": "#"
+            },
+            {
+              "title": "Pricing",
+              "url": "#"
+            },
+            {
+              "title": "About",
+              "url": "#"
+            }
           ],
           "buttons": [
             {
@@ -50,8 +59,15 @@
           "heading": "Build Beautiful Landing Pages",
           "description": "Create stunning landing pages with AI assistance. Fast, beautiful, and conversion-optimized.",
           "buttons": [
-            { "title": "Get Started", "variant": "secondary" },
-            { "title": "Learn More", "variant": "link", "size": "link" }
+            {
+              "title": "Get Started",
+              "variant": "secondary"
+            },
+            {
+              "title": "Learn More",
+              "variant": "link",
+              "size": "link"
+            }
           ],
           "image": {
             "src": "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
@@ -61,5 +77,309 @@
       }
     },
     "subdomain": "project-1759218000592"
+  },
+  {
+    "id": "1759570295796",
+    "user_id": "1759202559741",
+    "description": "3",
+    "status": "completed",
+    "deployed": true,
+    "created_at": "2025-10-04T09:31:35.796Z",
+    "updated_at": "2025-10-04T09:32:56.498Z",
+    "name": "Landing Page #1759570295796",
+    "landing_page_data": {
+      "sitemap": [
+        "block_001",
+        "block_002"
+      ],
+      "blocks": {
+        "block_001": {
+          "type": "navbar",
+          "subtype": "Navbar1",
+          "content": "content_001"
+        },
+        "block_002": {
+          "type": "hero_header_section",
+          "subtype": "Layout1",
+          "content": "content_002"
+        }
+      },
+      "block_contents": {
+        "content_001": {
+          "logo": {
+            "url": "#",
+            "src": "https://d22po4pjz3o32e.cloudfront.net/logo-image.svg",
+            "alt": "Logo image"
+          },
+          "navLinks": [
+            {
+              "title": "Link One",
+              "url": "#"
+            },
+            {
+              "title": "Link Two",
+              "url": "#"
+            },
+            {
+              "title": "Link Three",
+              "url": "#"
+            },
+            {
+              "title": "Link Four",
+              "url": "#",
+              "subMenuLinks": [
+                {
+                  "title": "Link Five",
+                  "url": "#"
+                },
+                {
+                  "title": "Link Six",
+                  "url": "#"
+                },
+                {
+                  "title": "Link Seven",
+                  "url": "#"
+                }
+              ]
+            }
+          ],
+          "buttons": [
+            {
+              "title": "Button",
+              "variant": "secondary",
+              "size": "sm"
+            },
+            {
+              "title": "Button",
+              "size": "sm"
+            }
+          ]
+        },
+        "content_002": {
+          "tagline": "Tagline",
+          "heading": "Medium length section heading goes here",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.",
+          "buttons": [
+            {
+              "title": "Button",
+              "variant": "secondary"
+            },
+            {
+              "title": "Button",
+              "variant": "link",
+              "size": "link",
+              "iconRight": null
+            }
+          ],
+          "image": {
+            "src": "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
+            "alt": "Relume placeholder image"
+          }
+        }
+      }
+    },
+    "subdomain": "project-1759570295796"
+  },
+  {
+    "id": "1759629080145",
+    "user_id": "1759629070256",
+    "description": "1",
+    "status": "completed",
+    "deployed": false,
+    "created_at": "2025-10-05T01:51:20.145Z",
+    "updated_at": "2025-10-05T01:51:23.164Z",
+    "name": "Landing Page #1759629080145",
+    "landing_page_data": {
+      "sitemap": [
+        "block_001",
+        "block_002"
+      ],
+      "blocks": {
+        "block_001": {
+          "type": "navbar",
+          "subtype": "Navbar1",
+          "content": "content_001"
+        },
+        "block_002": {
+          "type": "hero_header_section",
+          "subtype": "Layout1",
+          "content": "content_002"
+        }
+      },
+      "block_contents": {
+        "content_001": {
+          "logo": {
+            "url": "#",
+            "src": "https://d22po4pjz3o32e.cloudfront.net/logo-image.svg",
+            "alt": "Logo image"
+          },
+          "navLinks": [
+            {
+              "title": "Link One",
+              "url": "#"
+            },
+            {
+              "title": "Link Two",
+              "url": "#"
+            },
+            {
+              "title": "Link Three",
+              "url": "#"
+            },
+            {
+              "title": "Link Four",
+              "url": "#",
+              "subMenuLinks": [
+                {
+                  "title": "Link Five",
+                  "url": "#"
+                },
+                {
+                  "title": "Link Six2222",
+                  "url": "#"
+                },
+                {
+                  "title": "Link Seven",
+                  "url": "#"
+                }
+              ]
+            }
+          ],
+          "buttons": [
+            {
+              "title": "Button",
+              "variant": "secondary",
+              "size": "sm"
+            },
+            {
+              "title": "Button",
+              "size": "sm"
+            }
+          ]
+        },
+        "content_002": {
+          "tagline": "Tagline1111",
+          "heading": "Medium length section heading goes here",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.",
+          "buttons": [
+            {
+              "title": "Button",
+              "variant": "secondary"
+            },
+            {
+              "title": "Button",
+              "variant": "link",
+              "size": "link",
+              "iconRight": null
+            }
+          ],
+          "image": {
+            "src": "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
+            "alt": "Relume placeholder image"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "1759629746148",
+    "user_id": "1759629070256",
+    "description": "2",
+    "status": "completed",
+    "deployed": false,
+    "created_at": "2025-10-05T02:02:26.148Z",
+    "updated_at": "2025-10-05T02:02:29.152Z",
+    "name": "Landing Page #1759629746148",
+    "landing_page_data": {
+      "sitemap": [
+        "block_001",
+        "block_002"
+      ],
+      "blocks": {
+        "block_001": {
+          "type": "navbar",
+          "subtype": "Navbar1",
+          "content": "content_001"
+        },
+        "block_002": {
+          "type": "hero_header_section",
+          "subtype": "Layout1",
+          "content": "content_002"
+        }
+      },
+      "block_contents": {
+        "content_001": {
+          "logo": {
+            "url": "#",
+            "src": "https://d22po4pjz3o32e.cloudfront.net/logo-image.svg",
+            "alt": "Logo image"
+          },
+          "navLinks": [
+            {
+              "title": "Link One",
+              "url": "#"
+            },
+            {
+              "title": "Link Two",
+              "url": "#"
+            },
+            {
+              "title": "Link Three",
+              "url": "#"
+            },
+            {
+              "title": "Link Four",
+              "url": "#",
+              "subMenuLinks": [
+                {
+                  "title": "Link Five",
+                  "url": "#"
+                },
+                {
+                  "title": "Link Six",
+                  "url": "#"
+                },
+                {
+                  "title": "Link Seven",
+                  "url": "#"
+                }
+              ]
+            }
+          ],
+          "buttons": [
+            {
+              "title": "Button",
+              "variant": "secondary",
+              "size": "sm"
+            },
+            {
+              "title": "Button",
+              "size": "sm"
+            }
+          ]
+        },
+        "content_002": {
+          "tagline": "Tagline",
+          "heading": "Medium length section heading goes here",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.",
+          "buttons": [
+            {
+              "title": "Button",
+              "variant": "secondary"
+            },
+            {
+              "title": "Button",
+              "variant": "link",
+              "size": "link",
+              "iconRight": null
+            }
+          ],
+          "image": {
+            "src": "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
+            "alt": "Relume placeholder image"
+          }
+        }
+      }
+    }
   }
 ]
