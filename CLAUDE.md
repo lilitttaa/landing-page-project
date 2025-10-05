@@ -1,6 +1,6 @@
 # Landing Page Builder
 
-A Next.js 15.5.4 TypeScript application for creating and managing landing pages with AI assistance, featuring comprehensive authentication (Google OAuth + Email/Password), persistent JSON file-based data storage, **iframe-based editing system with isolated styling**, and full deployment functionality with React project generation.
+A Next.js 15.5.4 TypeScript application for creating and managing landing pages with AI assistance, featuring comprehensive authentication (Google OAuth + Email/Password), persistent JSON file-based data storage, **iframe-based editing system with isolated styling**, **automated component metadata generation**, **server-side data validation**, and full deployment functionality with React project generation.
 
 ## Project Structure
 
@@ -49,8 +49,13 @@ src/
 │   ├── AuthProvider.tsx           # NextAuth session provider wrapper
 │   ├── landing-page/
 │   │   ├── Navbar1.tsx            # Advanced Relume-style navbar with animations
-│   │   ├── Layout1.tsx            # Enhanced hero section with image support
-│   │   └── BlockRenderer.tsx      # Dynamic component renderer
+│   │   └── Layout1.tsx            # Enhanced hero section with image support
+│   ├── renderers/                 # Component rendering tools
+│   │   ├── BlockRenderer.tsx      # Dynamic component renderer
+│   │   └── ValidatedBlockRenderer.tsx # Server-validated component renderer
+│   ├── meta/                      # Auto-generated component metadata
+│   │   ├── Navbar1.meta.json      # Navbar1 component schema and defaults
+│   │   └── Layout1.meta.json      # Layout1 component schema and defaults
 │   ├── common/                    # Comprehensive UI component library
 │   │   ├── Button.tsx             # Multi-variant button component
 │   │   ├── Dialog.tsx             # Modal dialog system
@@ -66,11 +71,18 @@ src/
 │   └── tailwind.utils.js          # Config utilities for reuse (editing + deploy)
 ├── lib/
 │   ├── userService.ts             # User management and authentication with database operations
-│   ├── projectService.ts          # Project management and CRUD operations
-│   └── database.ts                # JSON file-based database layer
-└── types/
-    └── next-auth.d.ts             # TypeScript declarations for NextAuth
-data/                              # JSON database files (auto-created)
+│   ├── projectService.ts          # Project management with data validation integration
+│   ├── database.ts                # JSON file-based database layer
+│   ├── componentMetaGenerator.ts  # TypeScript-based component metadata generator
+│   └── componentDataValidator.ts  # Server-side data validation and merging
+├── types/
+│   ├── next-auth.d.ts             # TypeScript declarations for NextAuth
+│   └── component-meta.ts          # Component metadata type definitions
+└── scripts/                       # Automation and utility scripts
+    ├── generate-meta.ts           # Generate component metadata from source
+    ├── test-validation.ts         # Test data validation functionality
+    └── clean-project-data.ts      # Clean and normalize existing project data
+data/                              # JSON database files (auto-created, git-ignored)
 ├── users.json                    # User accounts and authentication data
 ├── projects.json                 # Project data with landing page content
 └── deployment_status.json        # Deployment status tracking
@@ -82,7 +94,7 @@ template/                          # React project template for deployment
 │   ├── main.tsx                  # React entry point
 │   └── components/               # Reusable components (generated from main project)
 └── public/                       # Static assets
-generated-sites/                   # Generated project builds
+generated-sites/                   # Generated project builds (git-ignored)
 ├── [projectId]/                  # Individual project directories
 │   ├── dist/                     # Built static files
 │   └── src/                      # Source code with adapted components
@@ -202,6 +214,58 @@ middleware.ts                     # Subdomain routing middleware
 - **Responsive Design**: Mobile-first components with Tailwind CSS
 - **Asset Management**: Proper static file serving and caching
 - **Path Independence**: All resources load correctly regardless of access method
+
+## Component Metadata System
+
+### Automated Metadata Generation
+- **TypeScript Source Analysis**: Automatically extracts component props, types, and documentation from source code
+- **Schema Generation**: Creates comprehensive JSON schemas for each component with property definitions
+- **Default Value Extraction**: Automatically captures default values from component exports
+- **Type Safety**: Full TypeScript integration with proper type definitions and validation
+
+### Data Validation & Integrity
+- **Server-Side Validation**: All user data validated against component schemas before storage
+- **Property Filtering**: Only valid properties defined in component metadata are preserved
+- **Default Value Merging**: Missing properties automatically filled with component defaults
+- **Schema Enforcement**: Ensures data consistency across edit, preview, and deployed modes
+
+### Automated Toolchain
+- **Metadata Generation**: `npm run generate-meta` - Generates component metadata from TypeScript source
+- **Data Validation Testing**: `npm run test-validation` - Comprehensive validation system testing
+- **Data Cleaning**: `npm run clean-data` - Normalizes existing project data to current schemas
+- **Version Control**: Git-ignored data directories prevent accidental commits of user data
+
+### Component Schema Structure
+```typescript
+interface ComponentMetaData {
+  componentName: string;
+  version: string;
+  description?: string;
+  properties: Record<string, PropertyDefinition>;
+  types: Record<string, Record<string, PropertyDefinition>>;
+  defaults: Record<string, any>;
+}
+
+interface PropertyDefinition {
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  required: boolean;
+  description?: string;
+  defaultValue?: any;
+  // Validation constraints
+  pattern?: string;
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  enum?: any[];
+}
+```
+
+### Integration Points
+- **ProjectService**: Automatic data validation and merging on all CRUD operations
+- **Edit/Preview Modes**: Server-validated content ensures consistent rendering
+- **Component Rendering**: ValidatedBlockRenderer uses pre-validated, complete data
+- **Future Extensions**: Ready for property panels, AI content generation, and advanced editing tools
 
 ## Deployment System
 
@@ -496,6 +560,11 @@ npm start
 
 # Run linting
 npm run lint
+
+# Component metadata and validation tools
+npm run generate-meta      # Generate component metadata from TypeScript source
+npm run test-validation    # Test data validation functionality
+npm run clean-data         # Clean and normalize existing project data
 ```
 
 ## Development Server
@@ -718,6 +787,12 @@ interface Layout1Props {
   - **Comprehensive Error Handling**: TypeScript compilation error resolution with relaxed build strictness
   - **Full Radix UI Integration**: Complete component library with proper dependency management
   - **Vite Build System**: Fast compilation with CDN fallback for maximum compatibility
+- **Component Metadata System**:
+  - **Automated Schema Generation**: TypeScript source code analysis with automatic metadata extraction
+  - **Server-Side Data Validation**: Comprehensive validation with schema enforcement and property filtering
+  - **Default Value Integration**: Automatic merging of user data with component defaults
+  - **Data Integrity Tools**: Automated scripts for metadata generation, validation testing, and data cleaning
+  - **Type-Safe Architecture**: Full TypeScript integration with proper type definitions
 - **User Interface**: Responsive dashboard with project cards, status tracking, and deployment controls
 - **Security**: bcrypt password hashing, session validation, and secure API endpoints
 
@@ -727,7 +802,7 @@ interface Layout1Props {
 - **Performance Optimization**: Caching strategies for iframe content and component rendering
 
 ### 📋 Planned Enhancements
-- **Component Library Expansion**: Additional Relume-style components and templates with automatic clone support
+- **Component Library Expansion**: Additional Relume-style components and templates with automatic metadata generation
 - **AI Integration**: Connecting to actual AI services for landing page content generation
 - **Database Migration**: Upgrade path to SQLite/PostgreSQL for production scaling
 - **Advanced Features**: Custom domains, team collaboration, analytics dashboard
