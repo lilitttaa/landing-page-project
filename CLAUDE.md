@@ -185,9 +185,10 @@ middleware.ts                     # Subdomain routing middleware
   - **Edit Mode**: iframe loads `/edit-frame/[id]` with custom Tailwind configuration
   - **Preview Mode**: iframe loads `/preview-static/[id]` with identical styling for consistency
 - **Interactive Editing Toolbar**:
-  - Mode toggle (Edit ↔ Preview)
-  - Save status indicator (saving, saved)
-  - Close/exit controls
+  - **Centered Mode Toggle**: Edit ↔ Preview mode switching with centered button layout for improved visual balance
+  - **Save Status Indicator**: Real-time display of saving states (saving, saved) with visual feedback
+  - **Close Controls**: Window close functionality for exiting the editor
+  - **Responsive Design**: Clean, professional toolbar layout with proper spacing and visual hierarchy
 - **Real-time Visual Editing**:
   - Metadata-driven mapping to make elements editable without modifying component files.
   - Click-to-edit functionality with visual indicators for text, images, and links.
