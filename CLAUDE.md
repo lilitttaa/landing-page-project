@@ -186,12 +186,17 @@ middleware.ts                     # Subdomain routing middleware
   - **Preview Mode**: iframe loads `/preview-static/[id]` with identical styling for consistency
 - **Interactive Editing Toolbar**:
   - Mode toggle (Edit ↔ Preview)
-  - Save changes functionality
+  - Save status indicator (saving, saved)
   - Close/exit controls
 - **Real-time Visual Editing**:
-  - Click-to-edit functionality with visual indicators
+  - Metadata-driven mapping to make elements editable without modifying component files.
+  - Click-to-edit functionality with visual indicators for text, images, and links.
   - Contextual edit tooltips on hover
-  - Modal editing dialogs for text and image content
+  - Modal editing dialogs for text, images, and links (text and URL).
+- **Auto-save and Manual Save**:
+  - Changes are automatically saved every second.
+  - Manual save can be triggered with `Ctrl + S`.
+  - A notification is displayed only on manual saves.
 - **PostMessage Communication**: Secure bidirectional communication between parent and iframe
 - **Unified Styling System**: Both edit and preview modes use identical custom Tailwind configuration via CDN
 
@@ -712,6 +717,7 @@ interface Layout1Props {
 ### Project APIs
 - `GET /api/projects` - Get user's projects (protected)
 - `POST /api/projects` - Create new project with landing page data generation (protected)
+- `PUT /api/projects/[id]/content` - Update project content (protected)
 
 ### Deployment APIs
 - `POST /api/projects/[id]/deploy` - Deploy landing page to independent React app
@@ -719,6 +725,9 @@ interface Layout1Props {
 
 ### Preview APIs
 - `GET /preview/[id]` - Server-side rendered landing page preview and edit mode
+
+### Metadata APIs
+- `GET /api/meta/[type]` - Get component metadata
 
 ### Static Asset APIs
 - `GET /api/deployed/[...slug]` - Serve static assets for deployed projects with proper caching
@@ -776,7 +785,9 @@ interface Layout1Props {
 - **iframe-based Editing System**:
   - Complete style isolation using iframe sandboxing
   - Dual-mode interface (Edit/Preview) with toolbar controls
-  - Real-time visual editing with click-to-edit functionality
+  - Real-time visual editing with click-to-edit functionality.
+  - **Save Functionality**: Persistent content updates from edit mode to database with auto-save and manual save (`Ctrl + S`).
+  - **Metadata-driven Editing**: Elements are made editable based on component metadata, without modifying the original component files.
   - PostMessage communication between parent and iframe
   - Unified Tailwind configuration ensuring consistent styling between edit and preview modes
 - **Production-Ready Deployment System**: 
@@ -797,8 +808,7 @@ interface Layout1Props {
 - **Security**: bcrypt password hashing, session validation, and secure API endpoints
 
 ### 🔄 In Progress
-- **Save Functionality**: Persistent content updates from edit mode to database
-- **Advanced Component Editor**: Rich editing interface for complex component properties
+- **Advanced Component Editor**: Rich editing interface for complex component properties, including adding and removing items from arrays.
 - **Performance Optimization**: Caching strategies for iframe content and component rendering
 
 ### 📋 Planned Enhancements
