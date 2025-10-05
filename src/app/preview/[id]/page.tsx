@@ -204,7 +204,62 @@ export default function LandingPagePreview() {
 
   return (
     <div className="relative min-h-screen bg-gray-100">
-      {/* ... toolbar ... */}
+      {/* 工具栏 */}
+      <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="w-20"></div> {/* 左侧占位 */}
+          
+          {/* 居中的模式切换按钮 */}
+          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setIsEditMode(true)}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                isEditMode
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => setIsEditMode(false)}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                !isEditMode
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Preview
+            </button>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            {/* 保存状态指示器 */}
+            {saveStatus === 'saving' && (
+              <span className="text-sm text-gray-600 flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                Saving...
+              </span>
+            )}
+            {saveStatus === 'saved' && (
+              <span className="text-sm text-green-600 flex items-center">
+                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Saved
+              </span>
+            )}
+            
+            {/* 关闭按钮 */}
+            <button
+              onClick={() => window.close()}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* iframe容器 */}
       <div className="pt-16 h-screen">
