@@ -72,39 +72,100 @@ export default function LandingPagePreview() {
     }
   }, [projectId]);
 
-  // 处理来自iframe的编辑请求
+  const [landingPageData, setLandingPageData] = useState<LandingPageData | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (project && project.landing_page_data) {
+      setLandingPageData(project.landing_page_data);
+    }
+  }, [project]);
+
+  const saveProject = async (data: LandingPageData, isManual = false) => {
+    if (!projectId) return;
+    setSaveStatus('saving');
+
+    try {
+      const response = await fetch(`/api/projects/${projectId}/content`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ landing_page_data: data }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save project');
+      }
+
+      if (isManual) {
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 2000);
+      } else {
+        setSaveStatus('idle');
+      }
+    } catch (error) {
+      console.error('Error saving project:', error);
+      setSaveStatus('idle'); // Or 'error' state
+    }
+  };
+
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'EDIT_REQUEST') {
-        const { elementType, elementPath, currentValue, position } = event.data.payload;
+        const { elementType, elementPath, currentValue, currentUrl, position } = event.data.payload;
         setEditingElement({
           type: elementType,
           path: elementPath,
           value: currentValue,
+          url: currentUrl,
           position
         });
+      } else if (event.data.type === 'DATA_UPDATE') {
+        const newData = event.data.payload;
+        setLandingPageData(newData);
+      } else if (event.data.type === 'MANUAL_SAVE_REQUEST') {
+        if (landingPageData) {
+          saveProject(landingPageData, true);
+        }
       }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, []);
+  }, [landingPageData, saveProject]);
 
-  // 处理内容更新
-  const handleContentUpdate = (newValue: string) => {
-    if (!editingElement || !iframeRef.current) return;
+  // Auto-save logic
+  useEffect(() => {
+    if (autoSaveTimer.current) {
+      clearTimeout(autoSaveTimer.current);
+    }
+    if (landingPageData && project && JSON.stringify(landingPageData) !== JSON.stringify(project.landing_page_data)) {
+      autoSaveTimer.current = setTimeout(() => {
+        saveProject(landingPageData);
+      }, 1000);
+    }
 
-    // 向iframe发送更新消息
-    iframeRef.current.contentWindow?.postMessage({
-      type: 'UPDATE_CONTENT',
-      payload: {
-        elementPath: editingElement.path,
-        newValue
+    return () => {
+      if (autoSaveTimer.current) {
+        clearTimeout(autoSaveTimer.current);
       }
-    }, '*');
+    };
+  }, [landingPageData, project, saveProject]);
 
-    // TODO: 这里应该调用API更新项目数据
-    // updateProjectContent(projectId, editingElement.path, newValue);
+  const handleContentUpdate = (updates: Array<{ path: string; value: string }>) => {
+    if (!iframeRef.current) return;
+
+    updates.forEach(({ path, value }) => {
+      iframeRef.current.contentWindow?.postMessage({
+        type: 'UPDATE_CONTENT',
+        payload: {
+          elementPath: path,
+          newValue: value
+        }
+      }, '*');
+    });
 
     setEditingElement(null);
   };
@@ -143,36 +204,7 @@ export default function LandingPagePreview() {
 
   return (
     <div className="relative min-h-screen bg-gray-100">
-      {/* 编辑模式工具栏 */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <h1 className="text-lg font-semibold">Edit Mode</h1>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setIsEditMode(!isEditMode)}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                isEditMode 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              {isEditMode ? 'Exit Edit' : 'Edit Mode'}
-            </button>
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
-            Save Changes
-          </button>
-          <button 
-            onClick={() => window.close()}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-          >
-            Close
-          </button>
-        </div>
-      </div>
+      {/* ... toolbar ... */}
 
       {/* iframe容器 */}
       <div className="pt-16 h-screen">
@@ -200,37 +232,45 @@ export default function LandingPagePreview() {
               Edit {editingElement.type}
             </h3>
             
-            {editingElement.type === 'image' ? (
+            {editingElement.type === 'link' ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Link Text</label>
+                  <input
+                    type="text"
+                    id="linkText"
+                    defaultValue={editingElement.value}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Link URL</label>
+                  <input
+                    type="url"
+                    id="linkUrl"
+                    defaultValue={editingElement.url}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            ) : editingElement.type === 'image' ? (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image URL
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
                 <input
                   type="url"
+                  id="imageUrl"
                   defaultValue={editingElement.value}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleContentUpdate((e.target as HTMLInputElement).value);
-                    }
-                  }}
-                  placeholder="Enter image URL"
                 />
               </div>
             ) : (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Text Content
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Text Content</label>
                 <textarea
+                  id="textContent"
                   defaultValue={editingElement.value}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows={4}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && e.ctrlKey) {
-                      handleContentUpdate((e.target as HTMLTextAreaElement).value);
-                    }
-                  }}
                 />
               </div>
             )}
@@ -244,12 +284,21 @@ export default function LandingPagePreview() {
               </button>
               <button
                 onClick={() => {
-                  const input = editingElement.type === 'image' 
-                    ? document.querySelector('input[type="url"]') as HTMLInputElement
-                    : document.querySelector('textarea') as HTMLTextAreaElement;
-                  if (input) {
-                    handleContentUpdate(input.value);
+                  const updates = [];
+                  if (editingElement.type === 'link') {
+                    const textInput = document.getElementById('linkText') as HTMLInputElement;
+                    const urlInput = document.getElementById('linkUrl') as HTMLInputElement;
+                    const urlPath = editingElement.path.replace(/\.title$/, '.url'); // Assuming title and url are siblings
+                    updates.push({ path: editingElement.path, value: textInput.value });
+                    updates.push({ path: urlPath, value: urlInput.value });
+                  } else if (editingElement.type === 'image') {
+                    const input = document.getElementById('imageUrl') as HTMLInputElement;
+                    updates.push({ path: editingElement.path, value: input.value });
+                  } else {
+                    const textarea = document.getElementById('textContent') as HTMLTextAreaElement;
+                    updates.push({ path: editingElement.path, value: textarea.value });
                   }
+                  handleContentUpdate(updates);
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >

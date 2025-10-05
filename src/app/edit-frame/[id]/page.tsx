@@ -70,81 +70,179 @@ export default function EditFrame() {
     }
   }, [projectId]);
 
-  // 设置编辑模式交互
+  const [landingPageData, setLandingPageData] = useState<LandingPageData | null>(null);
+  const [metadataCache, setMetadataCache] = useState<Record<string, any>>({});
+
   useEffect(() => {
-    if (!project) return;
+    if (project && project.landing_page_data) {
+      setLandingPageData(project.landing_page_data);
+    }
+  }, [project]);
+
+  // Fetch metadata
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      if (!landingPageData) return;
+      const componentTypes = [...new Set(landingPageData.sitemap.map(id => landingPageData.blocks[id].subtype))];
+      const newMetadata: Record<string, any> = {};
+      for (const type of componentTypes) {
+        try {
+          const response = await fetch(`/api/meta/${type}`);
+          if (response.ok) {
+            newMetadata[type] = await response.json();
+          }
+        } catch (error) {
+          console.error(`Failed to fetch metadata for ${type}`, error);
+        }
+      }
+      setMetadataCache(newMetadata);
+    };
+    fetchMetadata();
+  }, [landingPageData]);
+
+  useEffect(() => {
+    if (!landingPageData || Object.keys(metadataCache).length === 0) return;
 
     const setupEditMode = () => {
-      // 为所有可编辑元素添加编辑功能
-      const addEditableAttributes = (element: Element, path: string, type: string) => {
-        element.setAttribute('data-editable', type);
-        element.setAttribute('data-path', path);
-        element.classList.add('edit-highlight');
+      landingPageData.sitemap.forEach(blockId => {
+        const block = landingPageData.blocks[blockId];
+        const componentType = block.subtype;
+        const metadata = metadataCache[componentType];
+        if (!metadata) return;
+
+        const content = landingPageData.block_contents[block.content];
+        const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
+        if (!blockElement) return;
+
+        const editableProperties = flattenObject(content);
         
-        element.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          const currentValue = type === 'image' 
-            ? (element as HTMLImageElement).src 
-            : element.textContent || '';
-          
-          // 向父页面发送编辑请求
-          window.parent.postMessage({
-            type: 'EDIT_REQUEST',
-            payload: {
-              elementType: type,
-              elementPath: path,
-              currentValue,
-              position: {
-                x: e.clientX,
-                y: e.clientY
-              }
+        const unmappedTextElements = new Set(blockElement.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, button'));
+        const unmappedImgElements = new Set(blockElement.querySelectorAll('img'));
+
+        editableProperties.forEach(({ path, value }) => {
+          if (typeof value !== 'string') return;
+
+          // Match text content
+          for (const el of unmappedTextElements) {
+            if (el.textContent?.trim() === value.trim()) {
+              addEditableAttributes(el, `${blockId}.${path}`, 'text');
+              unmappedTextElements.delete(el);
+              break; // Found a match, move to the next property
             }
-          }, '*');
-        });
-      };
+          }
 
-      // 使用setTimeout确保DOM完全渲染
-      setTimeout(() => {
-        // 为文本元素添加编辑属性
-        document.querySelectorAll('h1, h2, h3, h4, h5, h6, p').forEach((element, index) => {
-          const tagName = element.tagName.toLowerCase();
-          addEditableAttributes(element, `${tagName}_${index}`, 'text');
+          // Match image src
+          for (const el of unmappedImgElements) {
+            if ((el as HTMLImageElement).src === value) {
+              addEditableAttributes(el, `${blockId}.${path}`, 'image');
+              unmappedImgElements.delete(el);
+              break; // Found a match, move to the next property
+            }
+          }
         });
-
-        // 为图片添加编辑属性
-        document.querySelectorAll('img').forEach((element, index) => {
-          addEditableAttributes(element, `image_${index}`, 'image');
-        });
-
-        // 为按钮添加编辑属性
-        document.querySelectorAll('button').forEach((element, index) => {
-          addEditableAttributes(element, `button_${index}`, 'button');
-        });
-      }, 100);
+      });
     };
 
-    setupEditMode();
+    const addEditableAttributes = (element: Element, path: string, type: string) => {
+      element.setAttribute('data-editable', type);
+      element.setAttribute('data-path', path);
+      element.classList.add('edit-highlight');
+      
+      element.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const isLink = element.tagName === 'A';
+        const payload = {
+          elementType: isLink ? 'link' : type,
+          elementPath: path,
+          currentValue: type === 'image' 
+            ? (element as HTMLImageElement).src 
+            : element.textContent || '',
+          currentUrl: isLink ? (element as HTMLAnchorElement).href : undefined,
+          position: { x: e.clientX, y: e.clientY }
+        };
+        
+        window.parent.postMessage({ type: 'EDIT_REQUEST', payload }, '*');
+      });
+    };
 
-    // 监听来自父页面的内容更新
+    // Helper to flatten object for easier mapping
+    const flattenObject = (obj: any, parentKey = '') => {
+      let result: { path: string, value: any }[] = [];
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          const newKey = parentKey ? `${parentKey}.${key}` : key;
+          if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+            result = result.concat(flattenObject(obj[key], newKey));
+          } else if (Array.isArray(obj[key])) {
+            obj[key].forEach((item: any, index: number) => {
+              if (typeof item === 'object' && item !== null) {
+                result = result.concat(flattenObject(item, `${newKey}.${index}`));
+              } else {
+                result.push({ path: `${newKey}.${index}`, value: item });
+              }
+            });
+          } else {
+            result.push({ path: newKey, value: obj[key] });
+          }
+        }
+      }
+      return result;
+    };
+
+    setTimeout(setupEditMode, 500); // Delay to ensure DOM is ready
+
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'UPDATE_CONTENT') {
         const { elementPath, newValue } = event.data.payload;
-        const element = document.querySelector(`[data-path="${elementPath}"]`);
-        if (element) {
-          if (element.tagName === 'IMG') {
-            (element as HTMLImageElement).src = newValue;
-          } else {
-            element.textContent = newValue;
+        const [blockId, ...restPath] = elementPath.split('.');
+        const contentKey = restPath.join('.');
+
+        setLandingPageData(prevData => {
+          if (!prevData) return null;
+
+          const newData = JSON.parse(JSON.stringify(prevData));
+          const block = newData.blocks[blockId];
+          if (block && newData.block_contents[block.content]) {
+            let current = newData.block_contents[block.content];
+            const keys = contentKey.split('.');
+            for (let i = 0; i < keys.length - 1; i++) {
+              current = current[keys[i]];
+            }
+            current[keys[keys.length - 1]] = newValue;
+
+            const element = document.querySelector(`[data-path="${elementPath}"]`);
+            if (element) {
+              if (element.tagName === 'IMG') {
+                (element as HTMLImageElement).src = newValue;
+              } else {
+                element.textContent = newValue;
+              }
+            }
           }
-        }
+          
+          window.parent.postMessage({ type: 'DATA_UPDATE', payload: newData }, '*');
+          return newData;
+        });
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === 's') {
+        event.preventDefault();
+        window.parent.postMessage({ type: 'MANUAL_SAVE_REQUEST' }, '*');
       }
     };
 
     window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [project]);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [landingPageData, metadataCache]);
 
   if (loading) {
     return (
@@ -212,17 +310,18 @@ export default function EditFrame() {
         }
       `}</style>
       
-      {landing_page_data.sitemap.map((blockId) => {
-        const block = landing_page_data.blocks[blockId];
-        const content = landing_page_data.block_contents[block.content];
+      {landingPageData && landingPageData.sitemap.map((blockId) => {
+        const block = landingPageData.blocks[blockId];
+        const content = landingPageData.block_contents[block.content];
         
         return (
-          <ValidatedBlockRenderer
-            key={blockId}
-            type={block.type}
-            subtype={block.subtype}
-            content={content}
-          />
+          <div key={blockId} data-block-id={blockId}>
+            <ValidatedBlockRenderer
+              type={block.type}
+              subtype={block.subtype}
+              content={content}
+            />
+          </div>
         );
       })}
     </div>
