@@ -62,17 +62,29 @@ export async function GET(
 }
 
 async function deployProject(projectId: string, landingPageData: any) {
+  const startTime = Date.now();
+  console.log(`🚀 [${new Date().toISOString()}] Starting deployment for project ${projectId}`);
+  
   try {
     // 生成项目
+    const generateStartTime = Date.now();
+    console.log(`📦 [${new Date().toISOString()}] Generating project files...`);
     const projectPath = await projectGenerator.generateProject(projectId, landingPageData);
+    const generateEndTime = Date.now();
+    console.log(`✅ [${new Date().toISOString()}] Project generation completed in ${generateEndTime - generateStartTime}ms`);
     
     // 构建项目
+    const buildStartTime = Date.now();
+    console.log(`🔨 [${new Date().toISOString()}] Starting build process...`);
     const distPath = await projectGenerator.buildProject(projectPath);
+    const buildEndTime = Date.now();
+    console.log(`✅ [${new Date().toISOString()}] Build completed in ${buildEndTime - buildStartTime}ms`);
     
     // 生成子域名
     const subdomain = `project-${projectId}`;
     
     // 更新部署状态
+    console.log(`💾 [${new Date().toISOString()}] Updating deployment status...`);
     ProjectService.setDeploymentStatus(projectId, 'completed', subdomain);
     
     // 更新项目信息
@@ -81,9 +93,14 @@ async function deployProject(projectId: string, landingPageData: any) {
       subdomain,
     });
     
-    console.log(`Project ${projectId} deployed successfully to subdomain: ${subdomain}`);
+    const totalTime = Date.now() - startTime;
+    console.log(`🎉 [${new Date().toISOString()}] Project ${projectId} deployed successfully to subdomain: ${subdomain}`);
+    console.log(`⏱️  Total deployment time: ${totalTime}ms (${(totalTime / 1000).toFixed(2)}s)`);
+    console.log(`📊 Breakdown: Generation: ${generateEndTime - generateStartTime}ms, Build: ${buildEndTime - buildStartTime}ms`);
+    
   } catch (error) {
-    console.error('Deployment error:', error);
+    const totalTime = Date.now() - startTime;
+    console.error(`❌ [${new Date().toISOString()}] Deployment failed after ${totalTime}ms:`, error);
     ProjectService.setDeploymentStatus(projectId, 'failed', undefined, error instanceof Error ? error.message : 'Unknown error');
   }
 }

@@ -31,20 +31,34 @@ export class ProjectGenerator {
   }
 
   async generateProject(projectId: string, landingPageData: LandingPageData): Promise<string> {
+    console.log(`🏗️  [${new Date().toISOString()}] Starting project generation for ${projectId}`);
     const projectPath = path.join(this.outputBasePath, projectId);
     
     // Copy template to project directory
+    const templateStartTime = Date.now();
+    console.log(`📁 [${new Date().toISOString()}] Copying template...`);
     await this.copyTemplate(projectPath);
+    console.log(`✅ Template copied in ${Date.now() - templateStartTime}ms`);
     
     // Copy and adapt components with dependencies
+    const componentsStartTime = Date.now();
+    console.log(`🧩 [${new Date().toISOString()}] Copying components and dependencies...`);
     await this.copyComponentsWithDependencies(projectPath, landingPageData);
+    console.log(`✅ Components copied in ${Date.now() - componentsStartTime}ms`);
     
     // Generate App.tsx with dynamic content
+    const appStartTime = Date.now();
+    console.log(`⚛️  [${new Date().toISOString()}] Generating App component...`);
     await this.generateAppComponent(projectPath, landingPageData);
+    console.log(`✅ App component generated in ${Date.now() - appStartTime}ms`);
     
     // Copy tailwind configuration
+    const tailwindStartTime = Date.now();
+    console.log(`🎨 [${new Date().toISOString()}] Copying Tailwind configuration...`);
     await this.copyTailwindConfig(projectPath);
+    console.log(`✅ Tailwind config copied in ${Date.now() - tailwindStartTime}ms`);
     
+    console.log(`🏗️  [${new Date().toISOString()}] Project generation completed for ${projectId}`);
     return projectPath;
   }
 
@@ -605,22 +619,79 @@ export default App;`;
   }
 
   async buildProject(projectPath: string): Promise<string> {
+    console.log(`🔨 [${new Date().toISOString()}] Starting build process for ${path.basename(projectPath)}`);
     const distPath = path.join(projectPath, 'dist');
     
     try {
-      // Install dependencies first
-      console.log('Installing dependencies...');
-      await this.runCommand('npm install', projectPath);
+      // 检查并使用共享的node_modules缓存
+      const sharedSetupStartTime = Date.now();
+      console.log(`📦 [${new Date().toISOString()}] Setting up shared dependencies...`);
+      await this.ensureSharedNodeModules();
+      await this.linkSharedNodeModules(projectPath);
+      console.log(`✅ Dependencies setup completed in ${Date.now() - sharedSetupStartTime}ms`);
       
       // Build the project using Vite
-      console.log('Building project with Vite...');
+      const viteStartTime = Date.now();
+      console.log(`⚡ [${new Date().toISOString()}] Running Vite build...`);
       await this.runCommand('npm run build', projectPath);
+      console.log(`✅ Vite build completed in ${Date.now() - viteStartTime}ms`);
       
+      console.log(`🔨 [${new Date().toISOString()}] Build process completed for ${path.basename(projectPath)}`);
       return distPath;
     } catch (error) {
-      console.error('Build failed:', error);
+      console.error(`❌ [${new Date().toISOString()}] Build failed for ${path.basename(projectPath)}:`, error);
       // Fallback to generating a simple HTML file if build fails
-      return await this.generateFallbackHtml(projectPath);
+      const fallbackStartTime = Date.now();
+      console.log(`🔄 [${new Date().toISOString()}] Falling back to static HTML generation...`);
+      const result = await this.generateFallbackHtml(projectPath);
+      console.log(`✅ Fallback HTML generated in ${Date.now() - fallbackStartTime}ms`);
+      return result;
+    }
+  }
+
+  private async ensureSharedNodeModules(): Promise<void> {
+    const sharedNodeModulesPath = path.join(process.cwd(), 'template', 'node_modules');
+    const templatePackageJsonPath = path.join(process.cwd(), 'template', 'package.json');
+    
+    // 检查共享的node_modules是否存在且是最新的
+    const hasSharedNodeModules = await this.directoryExists(sharedNodeModulesPath);
+    
+    if (!hasSharedNodeModules) {
+      console.log('Installing shared dependencies for faster deployments...');
+      // 在template目录中安装依赖，这样可以被所有项目共享
+      await this.runCommand('npm install --prefer-offline --no-audit --no-fund', path.join(process.cwd(), 'template'));
+      console.log('Shared dependencies installed successfully');
+    } else {
+      console.log('Using existing shared dependencies cache');
+    }
+  }
+
+  private async linkSharedNodeModules(projectPath: string): Promise<void> {
+    const projectNodeModulesPath = path.join(projectPath, 'node_modules');
+    const sharedNodeModulesPath = path.join(process.cwd(), 'template', 'node_modules');
+    
+    // 检查项目是否已经有node_modules链接
+    const hasProjectNodeModules = await this.directoryExists(projectNodeModulesPath);
+    
+    if (!hasProjectNodeModules) {
+      console.log('Setting up node_modules for faster build...');
+      
+      try {
+        if (process.platform === 'win32') {
+          // Windows: 使用robocopy命令，比fs.copyFile更稳定
+          console.log('Using robocopy for faster node_modules setup...');
+          await this.runCommand(`robocopy "${sharedNodeModulesPath}" "${projectNodeModulesPath}" /E /NFL /NDL /NJH /NJS /nc /ns /np`, process.cwd());
+        } else {
+          // Unix/Linux/Mac: 使用符号链接
+          await fs.promises.symlink(sharedNodeModulesPath, projectNodeModulesPath);
+        }
+        
+        console.log('Node modules setup completed successfully');
+      } catch (error) {
+        console.log('Shared dependencies setup failed, installing fresh dependencies...');
+        // 降级到直接安装，但使用缓存加速
+        await this.runCommand('npm install --prefer-offline --no-audit --no-fund --cache-min 3600', projectPath);
+      }
     }
   }
 
@@ -651,10 +722,21 @@ export default App;`;
       });
       
       child.on('close', (code) => {
-        if (code === 0) {
-          resolve();
+        // 特殊处理robocopy的退出码
+        if (command.startsWith('robocopy')) {
+          // robocopy退出码: 0-7是成功，8+是错误
+          if (code !== null && code >= 0 && code <= 7) {
+            resolve();
+          } else {
+            reject(new Error(`Robocopy failed with code ${code}: ${stderr}`));
+          }
         } else {
-          reject(new Error(`Command failed with code ${code}: ${stderr}`));
+          // 普通命令处理
+          if (code === 0) {
+            resolve();
+          } else {
+            reject(new Error(`Command failed with code ${code}: ${stderr}`));
+          }
         }
       });
       
