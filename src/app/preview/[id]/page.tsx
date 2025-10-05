@@ -235,12 +235,6 @@ export default function LandingPagePreview() {
           
           <div className="flex items-center space-x-4">
             {/* 保存状态指示器 */}
-            {saveStatus === 'saving' && (
-              <span className="text-sm text-gray-600 flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                Saving...
-              </span>
-            )}
             {saveStatus === 'saved' && (
               <span className="text-sm text-green-600 flex items-center">
                 <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
