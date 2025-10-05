@@ -181,24 +181,36 @@ middleware.ts                     # Subdomain routing middleware
 
 ### Page 3 - Advanced iframe-based Editing System (`/preview/[id]`)
 - **iframe Isolation Architecture**: Complete style and script isolation using iframe sandboxing
-- **Dual-Mode Interface**:
-  - **Edit Mode**: iframe loads `/edit-frame/[id]` with custom Tailwind configuration
-  - **Preview Mode**: iframe loads `/preview-static/[id]` with identical styling for consistency
+- **Single-iframe Architecture**: Unified iframe system supporting both edit and preview modes for optimal performance
 - **Interactive Editing Toolbar**:
   - **Centered Mode Toggle**: Edit ↔ Preview mode switching with centered button layout for improved visual balance
-  - **Save Status Indicator**: Real-time display of saving states (saving, saved) with visual feedback
+  - **Undo/Redo Controls**: Full history management with visual buttons and keyboard shortcuts (Ctrl+Z, Ctrl+Y)
+    - Smart disabled states when no operations are available
+    - Real-time visual feedback for available actions
+    - Left-aligned placement for easy access during editing
+  - **Save Status Notification**: Bottom-right notification system for manual save confirmations
   - **Close Controls**: Window close functionality for exiting the editor
   - **Responsive Design**: Clean, professional toolbar layout with proper spacing and visual hierarchy
+- **Comprehensive History Management**:
+  - **React useReducer Architecture**: Professional history state management with past/present/future arrays
+  - **Undo/Redo Operations**: Complete operation tracking with 50-operation limit to prevent memory overflow
+  - **Keyboard Shortcuts**: Industry-standard shortcuts (Ctrl+Z for undo, Ctrl+Y/Ctrl+Shift+Z for redo)
+  - **Database Persistence**: All undo/redo operations automatically saved to database for data integrity
+  - **Duplicate Prevention**: Smart deduplication prevents identical consecutive states
 - **Real-time Visual Editing**:
   - Metadata-driven mapping to make elements editable without modifying component files.
   - Click-to-edit functionality with visual indicators for text, images, and links.
   - Contextual edit tooltips on hover
   - Modal editing dialogs for text, images, and links (text and URL).
+  - **Mode-Aware Interactions**: Edit functionality preserved across mode switches using CSS-based approach
 - **Auto-save and Manual Save**:
   - Changes are automatically saved every second.
   - Manual save can be triggered with `Ctrl + S`.
-  - A notification is displayed only on manual saves.
+  - Bottom-right notification displayed only on manual saves.
 - **PostMessage Communication**: Secure bidirectional communication between parent and iframe
+  - DATA_UPDATE messages for real-time content changes
+  - DATA_REPLACE messages for undo/redo operations
+  - SET_MODE messages for seamless mode switching
 - **Unified Styling System**: Both edit and preview modes use identical custom Tailwind configuration via CDN
 
 ### Page 4 - Isolated Edit Frame (`/edit-frame/[id]`)
@@ -785,11 +797,18 @@ interface Layout1Props {
   - Framer Motion animations and micro-interactions
 - **iframe-based Editing System**:
   - Complete style isolation using iframe sandboxing
-  - Dual-mode interface (Edit/Preview) with toolbar controls
-  - Real-time visual editing with click-to-edit functionality.
-  - **Save Functionality**: Persistent content updates from edit mode to database with auto-save and manual save (`Ctrl + S`).
-  - **Metadata-driven Editing**: Elements are made editable based on component metadata, without modifying the original component files.
-  - PostMessage communication between parent and iframe
+  - Single-iframe architecture supporting both edit and preview modes with optimal performance
+  - **Comprehensive Undo/Redo System**: Full history management with React useReducer architecture
+    - Industry-standard keyboard shortcuts (Ctrl+Z, Ctrl+Y/Ctrl+Shift+Z)
+    - Visual toolbar buttons with smart disabled states
+    - 50-operation history limit with duplicate prevention
+    - Automatic database persistence for all operations
+  - Real-time visual editing with click-to-edit functionality
+  - **Advanced Mode Switching**: Seamless edit/preview transitions with CSS-based approach preserving functionality
+  - **Save Functionality**: Persistent content updates from edit mode to database with auto-save and manual save (`Ctrl + S`)
+  - **Bottom-right Notification System**: Non-intrusive save confirmations for manual saves
+  - **Metadata-driven Editing**: Elements are made editable based on component metadata, without modifying the original component files
+  - **Enhanced PostMessage Communication**: Secure bidirectional communication supporting DATA_UPDATE, DATA_REPLACE, and SET_MODE messages
   - Unified Tailwind configuration ensuring consistent styling between edit and preview modes
 - **Production-Ready Deployment System**: 
   - **Configuration-Driven Component Cloning**: Universal system supporting hundreds of components
@@ -824,9 +843,7 @@ interface Layout1Props {
 - **Development OAuth**: Google OAuth may have timeout errors with demo credentials (expected behavior)
 - **JSON File Storage**: Suitable for small to medium scale applications (< 10,000 users)
 - **Port Auto-detection**: Server automatically uses available ports (3000, 3001, 3003, etc.)
-- **Save Functionality**: Edit changes are visual-only, not yet persisted to database
 - **Component Library**: Currently optimized for Navbar1 and Layout1, expandable architecture in place
-- **iframe Performance**: Slight rendering overhead due to dual-environment architecture
 - **Complex Property Editing**: Advanced component properties (arrays, objects) need enhanced UI
 - **Concurrent Access**: JSON file writes are atomic but not optimized for high-concurrency scenarios
 
