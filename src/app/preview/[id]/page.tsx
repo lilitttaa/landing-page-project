@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useReducer, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 
 interface LandingPageBlock {
@@ -32,6 +32,95 @@ interface Project {
   createdAt: string;
   updatedAt: string;
   landing_page_data?: LandingPageData;
+}
+
+interface HistoryState {
+  past: LandingPageData[];
+  present: LandingPageData | null;
+  future: LandingPageData[];
+}
+
+type HistoryAction = 
+  | { type: 'PUSH'; payload: LandingPageData }
+  | { type: 'UNDO' }
+  | { type: 'REDO' }
+  | { type: 'RESET'; payload: LandingPageData }
+  | { type: 'CLEAR' };
+
+function historyReducer(state: HistoryState, action: HistoryAction): HistoryState {
+  switch (action.type) {
+    case 'PUSH': {
+      const { past, present } = state;
+      if (!present) {
+        return {
+          past: [],
+          present: action.payload,
+          future: []
+        };
+      }
+      
+      // 防止重复记录相同的数据
+      if (JSON.stringify(action.payload) === JSON.stringify(present)) {
+        return state;
+      }
+      
+      // 限制历史记录数量，避免内存溢出
+      const newPast = present ? [...past.slice(-49), present] : past;
+      
+      return {
+        past: newPast,
+        present: action.payload,
+        future: [] // 新操作会清空重做栈
+      };
+    }
+    
+    case 'UNDO': {
+      const { past, present, future } = state;
+      if (past.length === 0 || !present) return state;
+      
+      const previous = past[past.length - 1];
+      const newPast = past.slice(0, past.length - 1);
+      
+      return {
+        past: newPast,
+        present: previous,
+        future: [present, ...future]
+      };
+    }
+    
+    case 'REDO': {
+      const { past, present, future } = state;
+      if (future.length === 0 || !present) return state;
+      
+      const next = future[0];
+      const newFuture = future.slice(1);
+      
+      return {
+        past: [...past, present],
+        present: next,
+        future: newFuture
+      };
+    }
+    
+    case 'RESET': {
+      return {
+        past: [],
+        present: action.payload,
+        future: []
+      };
+    }
+    
+    case 'CLEAR': {
+      return {
+        past: [],
+        present: null,
+        future: []
+      };
+    }
+    
+    default:
+      return state;
+  }
 }
 
 export default function LandingPagePreview() {
@@ -72,15 +161,102 @@ export default function LandingPagePreview() {
     }
   }, [projectId]);
 
-  const [landingPageData, setLandingPageData] = useState<LandingPageData | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // 历史管理状态 - 作为单一数据源
+  const [historyState, historyDispatch] = useReducer(historyReducer, {
+    past: [],
+    present: null,
+    future: []
+  });
+
+  // 使用历史状态作为当前数据
+  const currentData = historyState.present;
+  
+  // 检查是否可以撤销/重做
+  const canUndo = historyState.past.length > 0;
+  const canRedo = historyState.future.length > 0;
+
+  // 调试日志
+  console.log('History state:', {
+    pastLength: historyState.past.length,
+    present: !!historyState.present,
+    futureLength: historyState.future.length,
+    canUndo,
+    canRedo
+  });
+
   useEffect(() => {
     if (project && project.landing_page_data) {
-      setLandingPageData(project.landing_page_data);
+      // 初始化历史状态
+      historyDispatch({ type: 'RESET', payload: project.landing_page_data });
     }
   }, [project]);
+
+  // 统一的数据更新函数
+  const updateData = useCallback((newData: LandingPageData) => {
+    console.log('Data update:', newData);
+    // 推送到历史记录，historyReducer会自动将当前数据推到past，新数据设为present
+    historyDispatch({ type: 'PUSH', payload: newData });
+  }, []);
+
+  // Undo/Redo 操作 (使用useCallback避免重复渲染)
+  const handleUndo = useCallback(() => {
+    console.log('Undo clicked:', { canUndo, pastLength: historyState.past.length });
+    
+    if (!canUndo || historyState.past.length === 0) return;
+    
+    // 先获取要恢复的数据，再执行dispatch
+    const previousData = historyState.past[historyState.past.length - 1];
+    console.log('Undoing to:', previousData);
+    
+    // 执行undo操作
+    historyDispatch({ type: 'UNDO' });
+    
+    // 通知iframe更新数据
+    if (iframeRef.current) {
+      setTimeout(() => {
+        iframeRef.current.contentWindow?.postMessage({
+          type: 'DATA_REPLACE',
+          payload: previousData
+        }, '*');
+      }, 0);
+    }
+    
+    // 自动保存undo后的数据
+    setTimeout(() => {
+      saveProject(previousData);
+    }, 100);
+  }, [canUndo, historyState.past.length]);
+
+  const handleRedo = useCallback(() => {
+    console.log('Redo clicked:', { canRedo, futureLength: historyState.future.length });
+    
+    if (!canRedo || historyState.future.length === 0) return;
+    
+    // 先获取要恢复的数据，再执行dispatch
+    const nextData = historyState.future[0];
+    console.log('Redoing to:', nextData);
+    
+    // 执行redo操作
+    historyDispatch({ type: 'REDO' });
+    
+    // 通知iframe更新数据
+    if (iframeRef.current) {
+      setTimeout(() => {
+        iframeRef.current.contentWindow?.postMessage({
+          type: 'DATA_REPLACE',
+          payload: nextData
+        }, '*');
+      }, 0);
+    }
+    
+    // 自动保存redo后的数据
+    setTimeout(() => {
+      saveProject(nextData);
+    }, 100);
+  }, [canRedo, historyState.future.length]);
 
   const saveProject = async (data: LandingPageData, isManual = false) => {
     if (!projectId) return;
@@ -124,26 +300,26 @@ export default function LandingPagePreview() {
         });
       } else if (event.data.type === 'DATA_UPDATE') {
         const newData = event.data.payload;
-        setLandingPageData(newData);
+        updateData(newData); // 直接记录到历史
       } else if (event.data.type === 'MANUAL_SAVE_REQUEST') {
-        if (landingPageData) {
-          saveProject(landingPageData, true);
+        if (currentData) {
+          saveProject(currentData, true);
         }
       }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [landingPageData, saveProject]);
+  }, [currentData, updateData]);
 
   // Auto-save logic
   useEffect(() => {
     if (autoSaveTimer.current) {
       clearTimeout(autoSaveTimer.current);
     }
-    if (landingPageData && project && JSON.stringify(landingPageData) !== JSON.stringify(project.landing_page_data)) {
+    if (currentData && project && JSON.stringify(currentData) !== JSON.stringify(project.landing_page_data)) {
       autoSaveTimer.current = setTimeout(() => {
-        saveProject(landingPageData);
+        saveProject(currentData);
       }, 1000);
     }
 
@@ -152,7 +328,32 @@ export default function LandingPagePreview() {
         clearTimeout(autoSaveTimer.current);
       }
     };
-  }, [landingPageData, project, saveProject]);
+  }, [currentData, project]);
+
+  // 键盘快捷键监听
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // 只在编辑模式下处理
+      if (!isEditMode) return;
+      
+      // 检查是否在编辑弹窗中，如果是则忽略
+      if (editingElement) return;
+      
+      if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key === 'z') {
+        event.preventDefault();
+        handleUndo();
+      } else if (
+        ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'Z') ||
+        ((event.ctrlKey || event.metaKey) && event.key === 'y')
+      ) {
+        event.preventDefault();
+        handleRedo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isEditMode, editingElement, handleUndo, handleRedo]);
 
   const handleContentUpdate = (updates: Array<{ path: string; value: string }>) => {
     if (!iframeRef.current) return;
@@ -200,19 +401,60 @@ export default function LandingPagePreview() {
     );
   }
 
-  const { landing_page_data } = project;
-
   return (
     <div className="relative min-h-screen bg-gray-100">
       {/* 工具栏 */}
       <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="w-20"></div> {/* 左侧占位 */}
+          {/* 左侧 Undo/Redo 按钮 (仅在编辑模式显示) */}
+          <div className="flex items-center space-x-2">
+            {isEditMode && (
+              <>
+                <button
+                  onClick={handleUndo}
+                  disabled={!canUndo}
+                  className={`p-2 rounded-md transition-colors ${
+                    canUndo
+                      ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                      : 'text-gray-400 cursor-not-allowed'
+                  }`}
+                  title={`Undo (Ctrl+Z)`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                  </svg>
+                </button>
+                <button
+                  onClick={handleRedo}
+                  disabled={!canRedo}
+                  className={`p-2 rounded-md transition-colors ${
+                    canRedo
+                      ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                      : 'text-gray-400 cursor-not-allowed'
+                  }`}
+                  title={`Redo (Ctrl+Y)`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" />
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
           
           {/* 居中的模式切换按钮 */}
           <div className="flex items-center bg-gray-100 rounded-lg p-1">
             <button
-              onClick={() => setIsEditMode(true)}
+              onClick={() => {
+                setIsEditMode(true);
+                // 通知iframe切换到编辑模式
+                if (iframeRef.current) {
+                  iframeRef.current.contentWindow?.postMessage({
+                    type: 'SET_MODE',
+                    payload: { mode: 'edit' }
+                  }, '*');
+                }
+              }}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 isEditMode
                   ? 'bg-white text-gray-900 shadow-sm'
@@ -222,7 +464,16 @@ export default function LandingPagePreview() {
               Edit
             </button>
             <button
-              onClick={() => setIsEditMode(false)}
+              onClick={() => {
+                setIsEditMode(false);
+                // 通知iframe切换到预览模式
+                if (iframeRef.current) {
+                  iframeRef.current.contentWindow?.postMessage({
+                    type: 'SET_MODE',
+                    payload: { mode: 'preview' }
+                  }, '*');
+                }
+              }}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 !isEditMode
                   ? 'bg-white text-gray-900 shadow-sm'
@@ -247,20 +498,21 @@ export default function LandingPagePreview() {
 
       {/* iframe容器 */}
       <div className="pt-16 h-screen">
-        {isEditMode ? (
-          <iframe
-            ref={iframeRef}
-            src={`/edit-frame/${projectId}`}
-            className="w-full h-full border-0"
-            title="Edit Mode"
-          />
-        ) : (
-          <iframe
-            src={`/preview-static/${projectId}`}
-            className="w-full h-full border-0"
-            title="Preview Mode"
-          />
-        )}
+        <iframe
+          ref={iframeRef}
+          src={`/edit-frame/${projectId}`}
+          className="w-full h-full border-0"
+          title={isEditMode ? "Edit Mode" : "Preview Mode"}
+          onLoad={() => {
+            // iframe加载完成后，发送当前模式
+            if (iframeRef.current) {
+              iframeRef.current.contentWindow?.postMessage({
+                type: 'SET_MODE',
+                payload: { mode: isEditMode ? 'edit' : 'preview' }
+              }, '*');
+            }
+          }}
+        />
       </div>
 
       {/* 编辑弹窗 */}

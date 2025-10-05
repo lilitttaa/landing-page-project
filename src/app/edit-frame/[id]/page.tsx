@@ -72,6 +72,7 @@ export default function EditFrame() {
 
   const [landingPageData, setLandingPageData] = useState<LandingPageData | null>(null);
   const [metadataCache, setMetadataCache] = useState<Record<string, any>>({});
+  const [isEditMode, setIsEditMode] = useState(true); // 默认编辑模式
 
   useEffect(() => {
     if (project && project.landing_page_data) {
@@ -126,6 +127,7 @@ export default function EditFrame() {
           for (const el of unmappedTextElements) {
             if (el.textContent?.trim() === value.trim()) {
               addEditableAttributes(el, `${blockId}.${path}`, 'text');
+              if (isEditMode) el.classList.add('edit-highlight');
               unmappedTextElements.delete(el);
               break; // Found a match, move to the next property
             }
@@ -135,6 +137,7 @@ export default function EditFrame() {
           for (const el of unmappedImgElements) {
             if ((el as HTMLImageElement).src === value) {
               addEditableAttributes(el, `${blockId}.${path}`, 'image');
+              if (isEditMode) el.classList.add('edit-highlight');
               unmappedImgElements.delete(el);
               break; // Found a match, move to the next property
             }
@@ -144,11 +147,15 @@ export default function EditFrame() {
     };
 
     const addEditableAttributes = (element: Element, path: string, type: string) => {
+      // 始终添加数据属性
       element.setAttribute('data-editable', type);
       element.setAttribute('data-path', path);
-      element.classList.add('edit-highlight');
       
-      element.addEventListener('click', (e) => {
+      // 添加点击事件监听器，但在处理函数中检查模式
+      const handleClick = (e: Event) => {
+        // 只在编辑模式下处理点击
+        if (!isEditMode) return;
+        
         e.preventDefault();
         e.stopPropagation();
         
@@ -160,11 +167,15 @@ export default function EditFrame() {
             ? (element as HTMLImageElement).src 
             : element.textContent || '',
           currentUrl: isLink ? (element as HTMLAnchorElement).href : undefined,
-          position: { x: e.clientX, y: e.clientY }
+          position: { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY }
         };
         
         window.parent.postMessage({ type: 'EDIT_REQUEST', payload }, '*');
-      });
+      };
+      
+      element.addEventListener('click', handleClick);
+      // 存储处理函数引用以便后续移除
+      (element as any)._editClickHandler = handleClick;
     };
 
     // Helper to flatten object for easier mapping
@@ -225,6 +236,24 @@ export default function EditFrame() {
           window.parent.postMessage({ type: 'DATA_UPDATE', payload: newData }, '*');
           return newData;
         });
+      } else if (event.data.type === 'DATA_REPLACE') {
+        // 处理Undo/Redo的全量数据替换
+        const newData = event.data.payload;
+        setLandingPageData(newData);
+      } else if (event.data.type === 'SET_MODE') {
+        // 处理模式切换
+        const { mode } = event.data.payload;
+        setIsEditMode(mode === 'edit');
+        
+        // 更新编辑高亮显示
+        const editableElements = document.querySelectorAll('[data-editable]');
+        editableElements.forEach(element => {
+          if (mode === 'edit') {
+            element.classList.add('edit-highlight');
+          } else {
+            element.classList.remove('edit-highlight');
+          }
+        });
       }
     };
 
@@ -242,7 +271,7 @@ export default function EditFrame() {
       window.removeEventListener('message', handleMessage);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [landingPageData, metadataCache]);
+  }, [landingPageData, metadataCache, isEditMode]);
 
   if (loading) {
     return (
