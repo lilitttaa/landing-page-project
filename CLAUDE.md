@@ -884,7 +884,13 @@ interface Layout1Props {
   - **Data Integrity Tools**: Automated scripts for metadata generation, validation testing, and data cleaning
   - **Type-Safe Architecture**: Full TypeScript integration with proper type definitions
 - **Comprehensive Editable Component System**:
-  - **Complete Wrapper Component Library**: EditableText, EditableImage, EditableLink, EditableButton, EditableArray, EditableDropdownTitle
+  - **Complete Wrapper Component Library**: EditableText, EditableImage, EditableLink, EditableButton, EditableArray, EditableDropdownTitle, EditableMenuItem
+  - **Unified Menu Item Editing**: EditableMenuItem component supporting bidirectional conversion between regular links and dropdown menus
+    - **Right-Click Editing**: Conflict-free editing triggered by right-click to avoid interference with dropdown functionality
+    - **Bidirectional Conversion**: Seamless switching between regular links and dropdown menus through unified interface
+    - **Submenu Management**: Real-time adding/removing of submenu items with validation
+    - **Type-Safe Data Transformation**: Automatic handling of data structure changes during link type conversion
+    - **Conflict Resolution**: Eliminates editing conflicts between SubMenu and EditableDropdownTitle components
   - **Smart Positioning System**: useSmartPosition hook with viewport boundary detection and context-aware placement
   - **Automated Component Transformation**: Script-based conversion preserving original components while adding editable capabilities
   - **Component Path Isolation**: basePath system with unique content IDs preventing cross-component editing conflicts
@@ -911,7 +917,6 @@ interface Layout1Props {
 - **JSON File Storage**: Suitable for small to medium scale applications (< 10,000 users)
 - **Port Auto-detection**: Server automatically uses available ports (3000, 3001, 3003, etc.)
 - **Component Library**: Currently optimized for Navbar1 and Layout1, expandable architecture in place
-- **Complex Property Editing**: Advanced component properties (arrays, objects) need enhanced UI
 - **Concurrent Access**: JSON file writes are atomic but not optimized for high-concurrency scenarios
 
 ## Future Enhancements
