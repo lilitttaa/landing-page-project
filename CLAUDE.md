@@ -48,11 +48,24 @@ src/
 ├── components/
 │   ├── AuthProvider.tsx           # NextAuth session provider wrapper
 │   ├── landing-page/
-│   │   ├── Navbar1.tsx            # Advanced Relume-style navbar with animations
-│   │   └── Layout1.tsx            # Enhanced hero section with image support
+│   │   ├── Navbar1.tsx            # Auto-generated editable navbar with wrapper components
+│   │   └── Layout1.tsx            # Auto-generated editable hero section with wrapper components
+│   ├── landing-page-original/     # Original component source files (backup)
+│   │   ├── Navbar1.tsx            # Original navbar component source
+│   │   └── Layout1.tsx            # Original hero section component source
+│   ├── editable/                  # Comprehensive editable wrapper component library
+│   │   ├── EditContext.tsx        # Context provider for edit state with basePath support
+│   │   ├── EditableText.tsx       # Text editing with smart positioning and validation
+│   │   ├── EditableImage.tsx      # Image editing with URL and alt text support
+│   │   ├── EditableLink.tsx       # Link editing with URL and text modification
+│   │   ├── EditableButton.tsx     # Button editing with variant and content support
+│   │   ├── EditableArray.tsx      # Generic array container with layout transparency
+│   │   ├── EditableDropdownTitle.tsx # Specialized dropdown menu title editing
+│   │   ├── useSmartPosition.ts    # Smart positioning hook with viewport boundary detection
+│   │   └── index.ts               # Centralized exports for all editable components
 │   ├── renderers/                 # Component rendering tools
 │   │   ├── BlockRenderer.tsx      # Dynamic component renderer
-│   │   └── ValidatedBlockRenderer.tsx # Server-validated component renderer
+│   │   └── ValidatedBlockRenderer.tsx # Server-validated component renderer with basePath
 │   ├── meta/                      # Auto-generated component metadata
 │   │   ├── Navbar1.meta.json      # Navbar1 component schema and defaults
 │   │   └── Layout1.meta.json      # Layout1 component schema and defaults
@@ -81,7 +94,9 @@ src/
 └── scripts/                       # Automation and utility scripts
     ├── generate-meta.ts           # Generate component metadata from source
     ├── test-validation.ts         # Test data validation functionality
-    └── clean-project-data.ts      # Clean and normalize existing project data
+    ├── clean-project-data.ts      # Clean and normalize existing project data
+    ├── copy-components.ts         # Copy original components to backup directory
+    └── transform-components.ts    # Automated component transformation to editable versions
 data/                              # JSON database files (auto-created, git-ignored)
 ├── users.json                    # User accounts and authentication data
 ├── projects.json                 # Project data with landing page content
@@ -198,10 +213,26 @@ middleware.ts                     # Subdomain routing middleware
   - **Database Persistence**: All undo/redo operations automatically saved to database for data integrity
   - **Duplicate Prevention**: Smart deduplication prevents identical consecutive states
 - **Real-time Visual Editing**:
-  - Metadata-driven mapping to make elements editable without modifying component files.
-  - Click-to-edit functionality with visual indicators for text, images, and links.
-  - Contextual edit tooltips on hover
-  - Modal editing dialogs for text, images, and links (text and URL).
+  - **Comprehensive Editable Component System**: Complete wrapper component library for all UI elements
+    - **EditableText**: Smart text editing with inline click-to-edit and modal dialogs
+    - **EditableImage**: Image editing with URL modification and alt text support
+    - **EditableLink**: Link editing with both URL and display text modification
+    - **EditableButton**: Button editing with variant, size, and content support
+    - **EditableArray**: Generic array container with layout-transparent rendering
+    - **EditableDropdownTitle**: Specialized component for dropdown menu title editing
+  - **Smart Positioning System**: Intelligent dialog positioning with viewport boundary detection
+    - **useSmartPosition Hook**: Custom positioning logic that ensures dialogs stay on-screen
+    - **Context-Aware Placement**: Dialogs appear near target elements with automatic adjustment
+    - **Responsive Behavior**: Adapts to different screen sizes and orientations
+  - **Component Path Isolation**: basePath system prevents cross-component editing conflicts
+    - **Unique Content IDs**: Each component instance gets isolated data paths (content_001, content_002)
+    - **Proper Path Management**: Nested properties correctly mapped to avoid data corruption
+    - **Conflict Prevention**: Multiple instances of same component type edit independently
+  - **Automated Component Transformation**: Script-based conversion of static components to editable versions
+    - **Original Component Preservation**: Backup system maintains source components unchanged
+    - **Automated Wrapper Injection**: Intelligent transformation adds editable wrappers without manual editing
+    - **Complex Structure Support**: Handles nested components, dropdown menus, and array structures
+    - **Scalable Architecture**: Supports transformation of hundreds of components efficiently
   - **Mode-Aware Interactions**: Edit functionality preserved across mode switches using CSS-based approach
 - **Auto-save and Manual Save**:
   - Changes are automatically saved every second.
@@ -595,6 +626,10 @@ npm run generate-meta      # Generate component metadata from TypeScript source
 npm run test-validation    # Test data validation functionality
 npm run clean-data         # Clean and normalize existing project data
 
+# Component transformation tools (editable system)
+npm run copy-components    # Copy original components to backup directory
+npm run transform-components transform  # Transform components to editable versions
+
 # Deployment optimization tools
 npm run prepare-shared-deps # Prepare shared dependencies for faster deployments (one-time setup)
 ```
@@ -848,6 +883,14 @@ interface Layout1Props {
   - **Default Value Integration**: Automatic merging of user data with component defaults
   - **Data Integrity Tools**: Automated scripts for metadata generation, validation testing, and data cleaning
   - **Type-Safe Architecture**: Full TypeScript integration with proper type definitions
+- **Comprehensive Editable Component System**:
+  - **Complete Wrapper Component Library**: EditableText, EditableImage, EditableLink, EditableButton, EditableArray, EditableDropdownTitle
+  - **Smart Positioning System**: useSmartPosition hook with viewport boundary detection and context-aware placement
+  - **Automated Component Transformation**: Script-based conversion preserving original components while adding editable capabilities
+  - **Component Path Isolation**: basePath system with unique content IDs preventing cross-component editing conflicts
+  - **Layout Consistency**: CSS `contents` property and careful styling ensuring identical appearance in edit/preview modes
+  - **Complex Structure Support**: Handles nested components, dropdown menus, sublinks, and array structures
+  - **Developer-Friendly Workflow**: Clear separation between original source components and generated editable versions
 - **User Interface**: Responsive dashboard with project cards, status tracking, and deployment controls
 - **Security**: bcrypt password hashing, session validation, and secure API endpoints
 
