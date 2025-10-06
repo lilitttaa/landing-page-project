@@ -1,8 +1,6 @@
 import { Button } from "../common";
 import type { ButtonProps } from "../common";
 import { RxChevronRight } from "react-icons/rx";
-import { EditableText, EditableImage, EditableLink, EditableButton, EditableArray, EditableDropdownTitle, EditProvider } from '../editable';
-
 
 type ImageProps = {
   src: string;
@@ -19,44 +17,35 @@ type Props = {
 
 export type Layout1Props = React.ComponentPropsWithoutRef<"section"> & Partial<Props>;
 
-export const Layout1 = (props: Layout1Props & { isEditMode?: boolean; onUpdate?: (path: string, value: any) => void; basePath?: string }) => {
-  const { isEditMode = false, onUpdate = () => {}, basePath } = props;
-  
-  const handleUpdate = (path: string, value: any) => {
-    console.log('Update:', path, value);
-    if (onUpdate) {
-      onUpdate(path, value);
-    }
-  };
-  
+export const Layout1 = (props: Layout1Props) => {
   const { tagline, heading, description, buttons, image } = {
     ...Layout1Defaults,
     ...props,
   };
-  
-  
   return (
-    <EditProvider isEditMode={isEditMode} onUpdate={handleUpdate} basePath={basePath}>
-      <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28">
+    <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28">
       <div className="container">
         <div className="grid grid-cols-1 gap-y-12 md:grid-cols-2 md:items-center md:gap-x-12 lg:gap-x-20">
           <div>
-            <EditableText as="p" path="tagline" value={tagline} className="mb-3 font-semibold md:mb-4">{tagline}</EditableText>
-            <EditableText as="h1" path="heading" value={heading} className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">{heading}</EditableText>
-            <EditableText as="p" path="description" value={description} className="md:text-md">{description}</EditableText>
+            <p className="mb-3 font-semibold md:mb-4">{tagline}</p>
+            <h1 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
+              {heading}
+            </h1>
+            <p className="md:text-md">{description}</p>
             <div className="mt-6 flex flex-wrap items-center gap-4 md:mt-8">
-              <EditableArray path="buttons" as="fragment">{buttons.map((button, index) => (
-                <EditableButton button={button} path="buttons" index={index} key={index} {...button} />
-              ))}</EditableArray>
+              {buttons.map((button, index) => (
+                <Button key={index} {...button}>
+                  {button.title}
+                </Button>
+              ))}
             </div>
           </div>
           <div>
-            <EditableImage src={image.src} path="image" className="w-full object-cover" alt={image.alt}  />
+            <img src={image.src} className="w-full object-cover" alt={image.alt} />
           </div>
         </div>
       </div>
     </section>
-    </EditProvider>
   );
 };
 

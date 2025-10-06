@@ -5,8 +5,6 @@ import { Button, useMediaQuery } from "../common";
 import type { ButtonProps } from "../common";
 import { AnimatePresence, motion } from "framer-motion";
 import { RxChevronDown } from "react-icons/rx";
-import { EditableText, EditableImage, EditableLink, EditableButton, EditableArray, EditableDropdownTitle, EditProvider } from '../editable';
-
 
 type ImageProps = {
   url?: string;
@@ -33,16 +31,7 @@ type Props = {
 
 export type Navbar1Props = React.ComponentPropsWithoutRef<"section"> & Partial<Props>;
 
-export const Navbar1 = (props: Navbar1Props & { isEditMode?: boolean; onUpdate?: (path: string, value: any) => void; basePath?: string }) => {
-  const { isEditMode = false, onUpdate = () => {}, basePath } = props;
-  
-  const handleUpdate = (path: string, value: any) => {
-    console.log('Update:', path, value);
-    if (onUpdate) {
-      onUpdate(path, value);
-    }
-  };
-  
+export const Navbar1 = (props: Navbar1Props) => {
   const { logo, navLinks, buttons } = {
     ...Navbar1Defaults,
     ...props,
@@ -51,18 +40,15 @@ export const Navbar1 = (props: Navbar1Props & { isEditMode?: boolean; onUpdate?:
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width: 991px)");
 
-  
-  
   return (
-    <EditProvider isEditMode={isEditMode} onUpdate={handleUpdate} basePath={basePath}>
-      <section
+    <section
       id="relume"
       className="z-[999] flex w-full items-center border-b border-border-primary bg-background-primary lg:min-h-18 lg:px-[5%]"
     >
       <div className="size-full lg:flex lg:items-center lg:justify-between">
         <div className="flex min-h-16 items-center justify-between px-[5%] md:min-h-18 lg:min-h-full lg:px-0">
           <a href={logo.url}>
-            <EditableImage src={logo.src} path="logo" alt={logo.alt}  />
+            <img src={logo.src} alt={logo.alt} />
           </a>
           <button
             className="-mr-2 flex size-12 flex-col items-center justify-center lg:hidden"
@@ -100,27 +86,33 @@ export const Navbar1 = (props: Navbar1Props & { isEditMode?: boolean; onUpdate?:
           transition={{ duration: 0.4 }}
           className="overflow-hidden px-[5%] lg:flex lg:items-center lg:px-0 lg:[--height-closed:auto] lg:[--height-open:auto]"
         >
-          <EditableArray path="navLinks" as="fragment">{navLinks.map((navLink, index) => navLink.subMenuLinks && navLink.subMenuLinks.length > 0 ? (
-              <SubMenu key={index} navLink={navLink} parentIndex={index} isMobile={isMobile} />
+          {navLinks.map((navLink, index) =>
+            navLink.subMenuLinks && navLink.subMenuLinks.length > 0 ? (
+              <SubMenu key={index} navLink={navLink} isMobile={isMobile} />
             ) : (
-              <EditableLink href={navLink.url}path={`navLinks.${index}.url`} textPath={`navLinks.${index}.title`} text={navLink.title} key={index}
-                
-                className="block py-3 text-md first:pt-7 lg:px-4 lg:py-2 lg:text-base first:lg:pt-2">{navLink.title}</EditableLink>
+              <a
+                key={index}
+                href={navLink.url}
+                className="block py-3 text-md first:pt-7 lg:px-4 lg:py-2 lg:text-base first:lg:pt-2"
+              >
+                {navLink.title}
+              </a>
             ),
-          )}</EditableArray>
+          )}
           <div className="mt-6 flex flex-col items-center gap-4 lg:ml-4 lg:mt-0 lg:flex-row">
-            <EditableArray path="buttons" as="fragment">{buttons.map((button, index) => (
-              <EditableButton button={button} path="buttons" index={index} key={index} {...button} className="w-full" />
-            ))}</EditableArray>
+            {buttons.map((button, index) => (
+              <Button key={index} {...button} className="w-full">
+                {button.title}
+              </Button>
+            ))}
           </div>
         </motion.div>
       </div>
     </section>
-    </EditProvider>
   );
 };
 
-const SubMenu = ({ navLink, parentIndex, isMobile }: { navLink: NavLink; parentIndex: number; isMobile: boolean }) => {
+const SubMenu = ({ navLink, isMobile }: { navLink: NavLink; isMobile: boolean }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
@@ -132,7 +124,7 @@ const SubMenu = ({ navLink, parentIndex, isMobile }: { navLink: NavLink; parentI
         className="flex w-full items-center justify-between gap-2 py-3 text-left text-md lg:flex-none lg:justify-start lg:px-4 lg:py-2 lg:text-base"
         onClick={() => setIsDropdownOpen((prev) => !prev)}
       >
-        <EditableDropdownTitle title={navLink.title} path={`navLinks.${parentIndex}.title`} as="span" value={navLink.title}>{navLink.title}</EditableDropdownTitle>
+        <span>{navLink.title}</span>
         <motion.span
           variants={{
             rotated: { rotate: 180 },
@@ -166,9 +158,13 @@ const SubMenu = ({ navLink, parentIndex, isMobile }: { navLink: NavLink; parentI
             className="bg-background-primary lg:absolute lg:z-50 lg:border lg:border-border-primary lg:p-2 lg:[--y-close:25%]"
           >
             {navLink.subMenuLinks?.map((navLink, index) => (
-              <EditableLink href={navLink.url}path={`navLinks.${parentIndex}.subMenuLinks.${index}.url`} textPath={`navLinks.${parentIndex}.subMenuLinks.${index}.title`} text={navLink.title} key={index}
-                
-                className="block py-3 pl-[5%] text-md lg:px-4 lg:py-2 lg:text-base">{navLink.title}</EditableLink>
+              <a
+                key={index}
+                href={navLink.url}
+                className="block py-3 pl-[5%] text-md lg:px-4 lg:py-2 lg:text-base"
+              >
+                {navLink.title}
+              </a>
             ))}
           </motion.nav>
         </AnimatePresence>

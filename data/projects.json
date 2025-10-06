@@ -381,5 +381,109 @@
         }
       }
     }
+  },
+  {
+    "id": "1759755076061",
+    "user_id": "1759629070256",
+    "description": "3",
+    "status": "completed",
+    "deployed": false,
+    "created_at": "2025-10-06T12:51:16.061Z",
+    "updated_at": "2025-10-06T15:12:39.221Z",
+    "name": "Landing Page #1759755076061",
+    "landing_page_data": {
+      "sitemap": [
+        "block_001",
+        "block_002"
+      ],
+      "blocks": {
+        "block_001": {
+          "type": "navbar",
+          "subtype": "Navbar1",
+          "content": "content_001"
+        },
+        "block_002": {
+          "type": "hero_header_section",
+          "subtype": "Layout1",
+          "content": "content_002"
+        }
+      },
+      "block_contents": {
+        "content_001": {
+          "logo": {
+            "url": "#",
+            "src": "https://d22po4pjz3o32e.cloudfront.net/logo-image.svg",
+            "alt": "Logo image"
+          },
+          "navLinks": [
+            {
+              "title": "Link Five33s",
+              "url": "#"
+            },
+            {
+              "title": "Link Sixs",
+              "url": "#"
+            },
+            {
+              "title": "Link Seven3",
+              "url": "#"
+            },
+            {
+              "title": "Link Four2",
+              "url": "#",
+              "subMenuLinks": [
+                {
+                  "title": "Link Five3",
+                  "url": "#"
+                },
+                {
+                  "title": "Link Six2",
+                  "url": "#"
+                },
+                {
+                  "title": "Link Seven",
+                  "url": "#"
+                }
+              ]
+            }
+          ],
+          "buttons": [
+            {
+              "title": "Button2223asd0",
+              "variant": "secondary",
+              "size": "sm"
+            },
+            {
+              "title": "Button",
+              "variant": "primary",
+              "size": "lg",
+              "iconRight": null
+            }
+          ]
+        },
+        "content_002": {
+          "tagline": "Tagline",
+          "heading": "Medium length section heading goes here12333323",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.",
+          "buttons": [
+            {
+              "title": "Button2223",
+              "variant": "secondary",
+              "size": "sm"
+            },
+            {
+              "title": "Button2323232",
+              "variant": "link",
+              "size": "lg",
+              "iconRight": null
+            }
+          ],
+          "image": {
+            "src": "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
+            "alt": "Relume placeholder image"
+          }
+        }
+      }
+    }
   }
 ]

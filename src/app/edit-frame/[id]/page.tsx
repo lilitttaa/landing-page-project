@@ -41,6 +41,8 @@ export default function EditFrame() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(true);
+  const [landingPageData, setLandingPageData] = useState<LandingPageData | null>(null);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -58,6 +60,9 @@ export default function EditFrame() {
         }
         
         setProject(foundProject);
+        if (foundProject.landing_page_data) {
+          setLandingPageData(foundProject.landing_page_data);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -70,173 +75,78 @@ export default function EditFrame() {
     }
   }, [projectId]);
 
-  const [landingPageData, setLandingPageData] = useState<LandingPageData | null>(null);
-  const [metadataCache, setMetadataCache] = useState<Record<string, any>>({});
-  const [isEditMode, setIsEditMode] = useState(true); // 默认编辑模式
+  // 处理编辑更新
+  const handleUpdate = (path: string, value: any) => {
+    if (!landingPageData) return;
 
-  useEffect(() => {
-    if (project && project.landing_page_data) {
-      setLandingPageData(project.landing_page_data);
-    }
-  }, [project]);
-
-  // Fetch metadata
-  useEffect(() => {
-    const fetchMetadata = async () => {
-      if (!landingPageData) return;
-      const componentTypes = [...new Set(landingPageData.sitemap.map(id => landingPageData.blocks[id].subtype))];
-      const newMetadata: Record<string, any> = {};
-      for (const type of componentTypes) {
-        try {
-          const response = await fetch(`/api/meta/${type}`);
-          if (response.ok) {
-            newMetadata[type] = await response.json();
+    // 解析路径，找到对应的block和属性
+    const newData = JSON.parse(JSON.stringify(landingPageData));
+    
+    // path格式现在是 "content_001.buttons.0" 这样的格式
+    const pathParts = path.split('.');
+    
+    if (pathParts.length >= 2) {
+      // 第一部分是contentId，后面是实际的属性路径
+      const contentId = pathParts[0];
+      const propertyPath = pathParts.slice(1);
+      
+      // 只更新指定的content
+      const content = newData.block_contents[contentId];
+      
+      if (content) {
+        // 更新嵌套属性
+        let current = content;
+        
+        // 导航到最后一级的父对象
+        for (let i = 0; i < propertyPath.length - 1; i++) {
+          if (current[propertyPath[i]]) {
+            current = current[propertyPath[i]];
           }
-        } catch (error) {
-          console.error(`Failed to fetch metadata for ${type}`, error);
+        }
+        
+        // 设置新值
+        const lastKey = propertyPath[propertyPath.length - 1];
+        if (current && current.hasOwnProperty(lastKey)) {
+          current[lastKey] = value;
         }
       }
-      setMetadataCache(newMetadata);
-    };
-    fetchMetadata();
-  }, [landingPageData]);
-
-  useEffect(() => {
-    if (!landingPageData || Object.keys(metadataCache).length === 0) return;
-
-    const setupEditMode = () => {
+    } else {
+      // 兼容旧的路径格式，更新所有block中的对应数据
       landingPageData.sitemap.forEach(blockId => {
         const block = landingPageData.blocks[blockId];
-        const componentType = block.subtype;
-        const metadata = metadataCache[componentType];
-        if (!metadata) return;
-
-        const content = landingPageData.block_contents[block.content];
-        const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
-        if (!blockElement) return;
-
-        const editableProperties = flattenObject(content);
+        const content = newData.block_contents[block.content];
         
-        const unmappedTextElements = new Set(blockElement.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, button'));
-        const unmappedImgElements = new Set(blockElement.querySelectorAll('img'));
-
-        editableProperties.forEach(({ path, value }) => {
-          if (typeof value !== 'string') return;
-
-          // Match text content
-          for (const el of unmappedTextElements) {
-            if (el.textContent?.trim() === value.trim()) {
-              addEditableAttributes(el, `${blockId}.${path}`, 'text');
-              if (isEditMode) el.classList.add('edit-highlight');
-              unmappedTextElements.delete(el);
-              break; // Found a match, move to the next property
-            }
-          }
-
-          // Match image src
-          for (const el of unmappedImgElements) {
-            if ((el as HTMLImageElement).src === value) {
-              addEditableAttributes(el, `${blockId}.${path}`, 'image');
-              if (isEditMode) el.classList.add('edit-highlight');
-              unmappedImgElements.delete(el);
-              break; // Found a match, move to the next property
-            }
-          }
-        });
-      });
-    };
-
-    const addEditableAttributes = (element: Element, path: string, type: string) => {
-      // 始终添加数据属性
-      element.setAttribute('data-editable', type);
-      element.setAttribute('data-path', path);
-      
-      // 添加点击事件监听器，但在处理函数中检查模式
-      const handleClick = (e: Event) => {
-        // 只在编辑模式下处理点击
-        if (!isEditMode) return;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const isLink = element.tagName === 'A';
-        const payload = {
-          elementType: isLink ? 'link' : type,
-          elementPath: path,
-          currentValue: type === 'image' 
-            ? (element as HTMLImageElement).src 
-            : element.textContent || '',
-          currentUrl: isLink ? (element as HTMLAnchorElement).href : undefined,
-          position: { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY }
-        };
-        
-        window.parent.postMessage({ type: 'EDIT_REQUEST', payload }, '*');
-      };
-      
-      element.addEventListener('click', handleClick);
-      // 存储处理函数引用以便后续移除
-      (element as any)._editClickHandler = handleClick;
-    };
-
-    // Helper to flatten object for easier mapping
-    const flattenObject = (obj: any, parentKey = '') => {
-      let result: { path: string, value: any }[] = [];
-      for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          const newKey = parentKey ? `${parentKey}.${key}` : key;
-          if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
-            result = result.concat(flattenObject(obj[key], newKey));
-          } else if (Array.isArray(obj[key])) {
-            obj[key].forEach((item: any, index: number) => {
-              if (typeof item === 'object' && item !== null) {
-                result = result.concat(flattenObject(item, `${newKey}.${index}`));
-              } else {
-                result.push({ path: `${newKey}.${index}`, value: item });
-              }
-            });
-          } else {
-            result.push({ path: newKey, value: obj[key] });
-          }
-        }
-      }
-      return result;
-    };
-
-    setTimeout(setupEditMode, 500); // Delay to ensure DOM is ready
-
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data.type === 'UPDATE_CONTENT') {
-        const { elementPath, newValue } = event.data.payload;
-        const [blockId, ...restPath] = elementPath.split('.');
-        const contentKey = restPath.join('.');
-
-        setLandingPageData(prevData => {
-          if (!prevData) return null;
-
-          const newData = JSON.parse(JSON.stringify(prevData));
-          const block = newData.blocks[blockId];
-          if (block && newData.block_contents[block.content]) {
-            let current = newData.block_contents[block.content];
-            const keys = contentKey.split('.');
-            for (let i = 0; i < keys.length - 1; i++) {
-              current = current[keys[i]];
-            }
-            current[keys[keys.length - 1]] = newValue;
-
-            const element = document.querySelector(`[data-path="${elementPath}"]`);
-            if (element) {
-              if (element.tagName === 'IMG') {
-                (element as HTMLImageElement).src = newValue;
-              } else {
-                element.textContent = newValue;
-              }
+        if (content) {
+          // 更新嵌套属性
+          const pathParts = path.split('.');
+          let current = content;
+          
+          // 导航到最后一级的父对象
+          for (let i = 0; i < pathParts.length - 1; i++) {
+            if (current[pathParts[i]]) {
+              current = current[pathParts[i]];
             }
           }
           
-          window.parent.postMessage({ type: 'DATA_UPDATE', payload: newData }, '*');
-          return newData;
-        });
-      } else if (event.data.type === 'DATA_REPLACE') {
+          // 设置新值
+          const lastKey = pathParts[pathParts.length - 1];
+          if (current && current.hasOwnProperty(lastKey)) {
+            current[lastKey] = value;
+          }
+        }
+      });
+    }
+
+    setLandingPageData(newData);
+    
+    // 通知父窗口数据更新
+    window.parent.postMessage({ type: 'DATA_UPDATE', payload: newData }, '*');
+  };
+
+  // 监听来自父窗口的消息
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'DATA_REPLACE') {
         // 处理Undo/Redo的全量数据替换
         const newData = event.data.payload;
         setLandingPageData(newData);
@@ -244,16 +154,6 @@ export default function EditFrame() {
         // 处理模式切换
         const { mode } = event.data.payload;
         setIsEditMode(mode === 'edit');
-        
-        // 更新编辑高亮显示
-        const editableElements = document.querySelectorAll('[data-editable]');
-        editableElements.forEach(element => {
-          if (mode === 'edit') {
-            element.classList.add('edit-highlight');
-          } else {
-            element.classList.remove('edit-highlight');
-          }
-        });
       }
     };
 
@@ -271,7 +171,7 @@ export default function EditFrame() {
       window.removeEventListener('message', handleMessage);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [landingPageData, metadataCache, isEditMode]);
+  }, []);
 
   if (loading) {
     return (
@@ -292,7 +192,7 @@ export default function EditFrame() {
     );
   }
 
-  if (!project || !project.landing_page_data) {
+  if (!project || !landingPageData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -303,43 +203,9 @@ export default function EditFrame() {
     );
   }
 
-  const { landing_page_data } = project;
-
   return (
     <div className="edit-mode-container min-h-screen bg-white">
-      {/* 编辑模式样式 */}
-      <style jsx global>{`
-        .edit-highlight {
-          outline: 2px dashed #3b82f6 !important;
-          outline-offset: 2px !important;
-          cursor: pointer !important;
-          position: relative;
-        }
-        .edit-highlight:hover {
-          outline-color: #1d4ed8 !important;
-          background-color: rgba(59, 130, 246, 0.05) !important;
-        }
-        .edit-highlight::before {
-          content: 'Click to edit';
-          position: absolute;
-          top: -30px;
-          left: 0;
-          background: #1f2937;
-          color: white;
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 12px;
-          z-index: 1000;
-          opacity: 0;
-          transition: opacity 0.2s;
-          pointer-events: none;
-        }
-        .edit-highlight:hover::before {
-          opacity: 1;
-        }
-      `}</style>
-      
-      {landingPageData && landingPageData.sitemap.map((blockId) => {
+      {landingPageData.sitemap.map((blockId) => {
         const block = landingPageData.blocks[blockId];
         const content = landingPageData.block_contents[block.content];
         
@@ -349,6 +215,9 @@ export default function EditFrame() {
               type={block.type}
               subtype={block.subtype}
               content={content}
+              blockId={block.content}
+              isEditMode={isEditMode}
+              onUpdate={handleUpdate}
             />
           </div>
         );

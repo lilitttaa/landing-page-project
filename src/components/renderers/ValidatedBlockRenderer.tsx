@@ -10,9 +10,19 @@ interface BlockRendererProps {
   type: string;
   subtype: string;
   content: any;
+  blockId?: string;
+  isEditMode?: boolean;
+  onUpdate?: (path: string, value: any) => void;
 }
 
-export default function ValidatedBlockRenderer({ type, subtype, content }: BlockRendererProps) {
+export default function ValidatedBlockRenderer({ 
+  type, 
+  subtype, 
+  content, 
+  blockId,
+  isEditMode = false, 
+  onUpdate 
+}: BlockRendererProps) {
   const Component = componentMap[subtype as keyof typeof componentMap];
   
   if (!Component) {
@@ -23,6 +33,6 @@ export default function ValidatedBlockRenderer({ type, subtype, content }: Block
     );
   }
 
-  // 直接使用传入的内容，假设服务端已经进行了校验和合并
-  return <Component {...content} />;
+  // 传递编辑相关的属性到组件，包括basePath
+  return <Component {...content} isEditMode={isEditMode} onUpdate={onUpdate} basePath={blockId} />;
 }

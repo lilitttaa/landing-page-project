@@ -6,44 +6,39 @@ export default function PreviewStaticLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Preview Mode</title>
-        
-        {/* 使用CDN版本的Tailwind来应用自定义配置 */}
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // 应用自定义Tailwind配置
-              tailwind.config = ${getTailwindConfigForCDN()};
-            `,
-          }}
-        />
-        
-        {/* 预览模式样式 */}
-        <style dangerouslySetInnerHTML={{
+    <>
+      {/* 预览模式样式 */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .preview-container {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+          }
+          
+          /* 隐藏滚动条但保持滚动功能 */
+          body {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+          body::-webkit-scrollbar {
+            display: none;
+          }
+        `
+      }} />
+      
+      {/* 使用CDN版本的Tailwind来应用自定义配置 */}
+      <script src="https://cdn.tailwindcss.com"></script>
+      <script
+        dangerouslySetInnerHTML={{
           __html: `
-            .preview-container {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            }
-            
-            /* 隐藏滚动条但保持滚动功能 */
-            body {
-              scrollbar-width: none;
-              -ms-overflow-style: none;
-            }
-            body::-webkit-scrollbar {
-              display: none;
-            }
-          `
-        }} />
-      </head>
-      <body className="preview-container">
+            // 应用自定义Tailwind配置
+            tailwind.config = ${getTailwindConfigForCDN()};
+          `,
+        }}
+      />
+      
+      <div className="preview-container">
         {children}
-      </body>
-    </html>
+      </div>
+    </>
   )
 }

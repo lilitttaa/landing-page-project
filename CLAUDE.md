@@ -903,6 +903,19 @@ interface Layout1Props {
 - **A/B Testing**: Multiple page variants and performance comparison tools
 
 ### Developer Experience
+
+## Development Guidelines
+
+### Component Transformation Rules
+- **NEVER directly modify generated components** in `src/components/landing-page/` directory
+- **ALWAYS modify the transformation script** `scripts/transform-components.ts` to change component behavior
+- **Use the transformation workflow**: 
+  1. Update original components in `src/components/landing-page-original/`
+  2. Modify transformation rules in `scripts/transform-components.ts` if needed
+  3. Run `npm run transform-components transform` to regenerate editable components
+- **This ensures consistency** and prevents manual changes from being overwritten
+
+### Developer Experience
 - **Testing Suite**: Comprehensive test coverage for authentication, database operations, and deployment flows
 - **API Documentation**: OpenAPI/Swagger documentation for all endpoints
 - **Database Migrations**: Automated migration scripts from JSON to SQL databases
