@@ -1,5 +1,6 @@
 import { Navbar1 } from '../landing-page/Navbar1';
 import { Layout1 } from '../landing-page/Layout1';
+import { EditableProvider } from '../editable';
 
 const componentMap = {
   Navbar1,
@@ -10,9 +11,11 @@ interface BlockRendererProps {
   type: string;
   subtype: string;
   content: any;
+  blockId?: string;
+  isEditMode?: boolean;
 }
 
-export default function ValidatedBlockRenderer({ type, subtype, content }: BlockRendererProps) {
+export default function ValidatedBlockRenderer({ type, subtype, content, blockId = 'block', isEditMode = false }: BlockRendererProps) {
   const Component = componentMap[subtype as keyof typeof componentMap];
   
   if (!Component) {
@@ -24,5 +27,9 @@ export default function ValidatedBlockRenderer({ type, subtype, content }: Block
   }
 
   // 直接使用传入的内容，假设服务端已经进行了校验和合并
-  return <Component {...content} />;
+  return (
+    <EditableProvider blockId={blockId} isEditMode={isEditMode}>
+      <Component {...content} />
+    </EditableProvider>
+  );
 }

@@ -1,5 +1,6 @@
 import { Navbar1 } from '../landing-page/Navbar1';
 import { Layout1 } from '../landing-page/Layout1';
+import { EditableProvider } from '../editable';
 
 const componentMap = {
   Navbar1,
@@ -10,9 +11,11 @@ interface BlockRendererProps {
   type: string;
   subtype: string;
   content: any;
+  blockId?: string;
+  isEditMode?: boolean;
 }
 
-export default function BlockRenderer({ type, subtype, content }: BlockRendererProps) {
+export default function BlockRenderer({ type, subtype, content, blockId = 'block', isEditMode = false }: BlockRendererProps) {
   const Component = componentMap[subtype as keyof typeof componentMap];
   
   if (!Component) {
@@ -23,5 +26,9 @@ export default function BlockRenderer({ type, subtype, content }: BlockRendererP
     );
   }
   
-  return <Component {...content} />;
+  return (
+    <EditableProvider blockId={blockId} isEditMode={isEditMode}>
+      <Component {...content} />
+    </EditableProvider>
+  );
 }
