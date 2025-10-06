@@ -1,7 +1,7 @@
 import { Button } from "../common";
 import type { ButtonProps } from "../common";
 import { RxChevronRight } from "react-icons/rx";
-import { EditableText, EditableImage, EditableLink, EditableButton, EditableArray, EditableDropdownTitle, EditProvider } from '../editable';
+import { EditableText, EditableImage, EditableLink, EditableButton, EditableArray, EditableDropdownTitle, EditableMenuItem, EditProvider } from '../editable';
 
 
 type ImageProps = {

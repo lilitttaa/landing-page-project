@@ -23,7 +23,7 @@ export class ComponentTransformer {
   constructor() {
     this.config = {
       imports: [
-        `import { EditableText, EditableImage, EditableLink, EditableButton, EditableArray, EditableDropdownTitle, EditProvider } from '../editable';`
+        `import { EditableText, EditableImage, EditableLink, EditableButton, EditableArray, EditableDropdownTitle, EditableMenuItem, EditProvider } from '../editable';`
       ],
       rules: [
         // Transform simple text content in JSX elements
@@ -133,6 +133,23 @@ export class ComponentTransformer {
         },
         
         
+        // Replace SubMenu and EditableLink with unified EditableMenuItem  
+        {
+          pattern: /<EditableArray path="navLinks" as="fragment">\{navLinks\.map\((navLink, index)\s*=>\s*navLink\.subMenuLinks && navLink\.subMenuLinks\.length > 0 \?\s*\(\s*<SubMenu[^>]*\/>\s*\)\s*:\s*\(\s*<EditableLink[^>]*>[^<]*<\/EditableLink>\s*\),?\s*\)\}<\/EditableArray>/g,
+          replacement: (match) => {
+            return `<EditableArray path="navLinks" as="fragment">{navLinks.map((navLink, index) => (
+              <EditableMenuItem 
+                key={index} 
+                navLink={navLink} 
+                index={index} 
+                isMobile={isMobile}
+                className="block py-3 text-md first:pt-7 lg:px-4 lg:py-2 lg:text-base first:lg:pt-2"
+              />
+            ))}</EditableArray>`;
+          },
+          description: 'Replace SubMenu and EditableLink with unified EditableMenuItem'
+        },
+
         // Transform map operations for arrays (keep original content, just wrap with EditableArray)
         {
           pattern: /\{([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\.\s*map\s*\(\s*\(([^,)]+)(?:,\s*([^)]+))?\)\s*=>\s*([\s\S]*?)\)\s*\}/g,
