@@ -72,10 +72,7 @@ export const Navbar1 = (props: Navbar1Props & {
       </div>
     </section></EditProvider>);
 };
-const SubMenu = ({ navLink, isMobile }: {
-    navLink: NavLink;
-    isMobile: boolean;
-}) => {
+const SubMenu = ({ navLink, parentIndex, isMobile }: { navLink: NavLink; parentIndex: number; isMobile: boolean }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     return (<div onMouseEnter={() => !isMobile && setIsDropdownOpen(true)} onMouseLeave={() => !isMobile && setIsDropdownOpen(false)}>
       <button className="flex w-full items-center justify-between gap-2 py-3 text-left text-md lg:flex-none lg:justify-start lg:px-4 lg:py-2 lg:text-base" onClick={() => setIsDropdownOpen((prev) => !prev)}>

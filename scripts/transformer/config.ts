@@ -55,7 +55,7 @@ export const TRANSFORM_RULES: TransformRule[] = [
     description: 'Convert anchor tags with text to EditableLink'
   },
   {
-    pattern: /const SubMenu = \(\{ navLink, isMobile \}: \{ navLink: NavLink; isMobile: boolean \}\)/g,
+    pattern: /const SubMenu = \(\{\s*navLink,\s*isMobile\s*\}:\s*\{\s*navLink:\s*NavLink;\s*isMobile:\s*boolean;\s*\}\)/g,
     replacement: () => {
       return `const SubMenu = ({ navLink, parentIndex, isMobile }: { navLink: NavLink; parentIndex: number; isMobile: boolean })`;
     },

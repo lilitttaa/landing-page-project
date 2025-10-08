@@ -2,19 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
 import { ProjectService } from '@/lib/projectService';
+import { buildDefaultLandingPageData } from '@/lib/landingPageDefaults';
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const projects = ProjectService.getUserProjects(session.user.id);
-    
-    // 转换数据格式以匹配前端期望
-    const formattedProjects = projects.map(project => ({
+
+    // Convert data shape to match frontend expectations
+    const formattedProjects = projects.map((project) => ({
       id: project.id,
       userId: project.user_id,
       name: project.name,
@@ -36,24 +37,23 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const { description } = await request.json();
-    
+
     if (!description?.trim()) {
       return NextResponse.json({ error: 'Description is required' }, { status: 400 });
     }
 
     const newProject = ProjectService.createProject(session.user.id, description);
 
-    // 异步处理项目生成
+    // Kick off asynchronous project generation
     processProjectGeneration(newProject.id);
 
-    // 转换数据格式
     const formattedProject = {
       id: newProject.id,
       userId: newProject.user_id,
@@ -72,60 +72,19 @@ export async function POST(request: NextRequest) {
 }
 
 async function processProjectGeneration(projectId: string) {
-  // 模拟生成过程，3秒后完成
+  // Simulate async generation step completing after 3 seconds
   setTimeout(() => {
     try {
+      const project = ProjectService.getProjectById(projectId);
+      const landingPageData = buildDefaultLandingPageData({
+        projectId,
+        description: project?.description,
+      });
+      const projectName = project?.name || `Landing Page #${projectId}`;
+
       const success = ProjectService.updateProjectStatus(projectId, 'completed', {
-        name: `Landing Page #${projectId}`,
-        landing_page_data: {
-          sitemap: ["block_001", "block_002"],
-          blocks: {
-            block_001: {
-              type: "navbar",
-              subtype: "Navbar1",
-              content: "content_001"
-            },
-            block_002: {
-              type: "hero_header_section",
-              subtype: "Header3",
-              content: "content_002"
-            }
-          },
-          block_contents: {
-            content_001: {
-              logo: {
-                url: "#",
-                src: "/logo.png",
-                alt: "Logo image"
-              },
-              navLinks: [
-                { title: "Features", url: "#" },
-                { title: "Pricing", url: "#" },
-                { title: "About", url: "#" }
-              ],
-              buttons: [
-                {
-                  title: "Get Started",
-                  variant: "secondary",
-                  size: "sm"
-                }
-              ]
-            },
-            content_002: {
-              heading: "Build Beautiful Landing Pages",
-              description: "Create stunning landing pages with AI assistance. Fast, beautiful, and conversion-optimized.",
-              buttons: [
-                { title: "Get Started" },
-                { title: "Watch Demo", variant: "secondary" }
-              ],
-              video: "https://www.youtube.com/embed/8DKLYsikxTs?si=Ch9W0KrDWWUiCMMW",
-              image: {
-                src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-video-thumbnail.svg",
-                alt: "Product video thumbnail"
-              }
-            }
-          }
-        }
+        name: projectName,
+        landing_page_data: landingPageData,
       });
 
       if (!success) {
