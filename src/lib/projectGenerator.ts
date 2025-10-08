@@ -635,32 +635,60 @@ export default App;`;
 
   async buildProject(projectPath: string): Promise<string> {
     console.log(`🔨 [${new Date().toISOString()}] Starting build process for ${path.basename(projectPath)}`);
+    const result = await this.buildProjectWithResult(projectPath);
+
+    if (result.success) {
+      console.log(`🔨 [${new Date().toISOString()}] Build process completed for ${path.basename(projectPath)}`);
+      return result.distPath;
+    }
+
+    console.error(
+      `❌ [${new Date().toISOString()}] Build failed for ${path.basename(projectPath)}:`,
+      result.error ?? result.stderr ?? 'Unknown error'
+    );
+
+    const fallbackStartTime = Date.now();
+    console.log(`🔄 [${new Date().toISOString()}] Falling back to static HTML generation...`);
+    const fallbackDist = await this.generateFallbackHtml(projectPath);
+    console.log(`✅ Fallback HTML generated in ${Date.now() - fallbackStartTime}ms`);
+    return fallbackDist;
+  }
+
+  async buildProjectWithResult(projectPath: string): Promise<{
+    success: boolean;
+    distPath: string;
+    stdout?: string;
+    stderr?: string;
+    error?: unknown;
+  }> {
     const distPath = path.join(projectPath, 'dist');
-    
+
     try {
-      // 检查并使用共享的node_modules缓存
       const sharedSetupStartTime = Date.now();
       console.log(`📦 [${new Date().toISOString()}] Setting up shared dependencies...`);
       await this.ensureSharedNodeModules();
       await this.linkSharedNodeModules(projectPath);
       console.log(`✅ Dependencies setup completed in ${Date.now() - sharedSetupStartTime}ms`);
-      
-      // Build the project using Vite
+
       const viteStartTime = Date.now();
       console.log(`⚡ [${new Date().toISOString()}] Running Vite build...`);
-      await this.runCommand('npm run build', projectPath);
+      const { stdout, stderr } = await this.runCommand('npm run build', projectPath);
       console.log(`✅ Vite build completed in ${Date.now() - viteStartTime}ms`);
-      
-      console.log(`🔨 [${new Date().toISOString()}] Build process completed for ${path.basename(projectPath)}`);
-      return distPath;
+
+      return {
+        success: true,
+        distPath,
+        stdout,
+        stderr
+      };
     } catch (error) {
-      console.error(`❌ [${new Date().toISOString()}] Build failed for ${path.basename(projectPath)}:`, error);
-      // Fallback to generating a simple HTML file if build fails
-      const fallbackStartTime = Date.now();
-      console.log(`🔄 [${new Date().toISOString()}] Falling back to static HTML generation...`);
-      const result = await this.generateFallbackHtml(projectPath);
-      console.log(`✅ Fallback HTML generated in ${Date.now() - fallbackStartTime}ms`);
-      return result;
+      return {
+        success: false,
+        distPath,
+        error,
+        stdout: (error as any)?.stdout,
+        stderr: (error as any)?.stderr
+      };
     }
   }
 
@@ -710,7 +738,7 @@ export default App;`;
     }
   }
 
-  private async runCommand(command: string, cwd: string): Promise<void> {
+  private async runCommand(command: string, cwd: string): Promise<{ stdout: string; stderr: string }> {
     const { spawn } = require('child_process');
     const isWindows = process.platform === 'win32';
     
@@ -737,25 +765,37 @@ export default App;`;
       });
       
       child.on('close', (code) => {
+        const result = { stdout, stderr };
+
         // 特殊处理robocopy的退出码
         if (command.startsWith('robocopy')) {
           // robocopy退出码: 0-7是成功，8+是错误
           if (code !== null && code >= 0 && code <= 7) {
-            resolve();
+            resolve(result);
           } else {
-            reject(new Error(`Robocopy failed with code ${code}: ${stderr}`));
+            const error = new Error(`Robocopy failed with code ${code}: ${stderr}`) as any;
+            error.code = code;
+            error.stdout = stdout;
+            error.stderr = stderr;
+            reject(error);
           }
         } else {
           // 普通命令处理
           if (code === 0) {
-            resolve();
+            resolve(result);
           } else {
-            reject(new Error(`Command failed with code ${code}: ${stderr}`));
+            const error = new Error(`Command failed with code ${code}: ${stderr}`) as any;
+            error.code = code;
+            error.stdout = stdout;
+            error.stderr = stderr;
+            reject(error);
           }
         }
       });
       
       child.on('error', (error) => {
+        (error as any).stdout = stdout;
+        (error as any).stderr = stderr;
         reject(error);
       });
     });
