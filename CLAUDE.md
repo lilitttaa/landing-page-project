@@ -1,4 +1,4 @@
-﻿# Landing Page Builder
+# Landing Page Builder
 
 A Next.js 15.5.4 TypeScript application for creating and managing landing pages with AI assistance, featuring comprehensive authentication (Google OAuth + Email/Password), persistent JSON file-based data storage, **iframe-based editing system with isolated styling**, **automated component metadata generation**, **server-side data validation**, and full deployment functionality with React project generation.
 
@@ -6,113 +6,113 @@ A Next.js 15.5.4 TypeScript application for creating and managing landing pages 
 
 ```
 src/
-鈹溾攢鈹€ app/
-鈹?  鈹溾攢鈹€ page.tsx                    # Landing page with auth-aware UI
-鈹?  鈹溾攢鈹€ auth/
-鈹?  鈹?  鈹溾攢鈹€ signin/
-鈹?  鈹?  鈹?  鈹斺攢鈹€ page.tsx           # Multi-provider login page
-鈹?  鈹?  鈹斺攢鈹€ register/
-鈹?  鈹?      鈹斺攢鈹€ page.tsx           # Email/password registration
-鈹?  鈹溾攢鈹€ dashboard/
-鈹?  鈹?  鈹斺攢鈹€ page.tsx               # Protected dashboard with user projects
-鈹?  鈹溾攢鈹€ preview/
-鈹?  鈹?  鈹斺攢鈹€ [id]/
-鈹?  鈹?      鈹斺攢鈹€ page.tsx           # iframe-based editing interface with toolbar
-鈹?  鈹溾攢鈹€ edit-frame/
-鈹?  鈹?  鈹溾攢鈹€ [id]/
-鈹?  鈹?  鈹?  鈹斺攢鈹€ page.tsx           # Isolated editing environment (iframe content)
-鈹?  鈹?  鈹斺攢鈹€ layout.tsx             # Custom layout with isolated Tailwind config
-鈹?  鈹溾攢鈹€ preview-static/
-鈹?  鈹?  鈹溾攢鈹€ [id]/
-鈹?  鈹?  鈹?  鈹斺攢鈹€ page.tsx           # Static preview mode (non-editable)
-鈹?  鈹?  鈹斺攢鈹€ layout.tsx             # Custom layout with identical Tailwind config as edit-frame
-鈹?  鈹溾攢鈹€ deployed/
-鈹?  鈹?  鈹斺攢鈹€ [subdomain]/
-鈹?  鈹?      鈹斺攢鈹€ page.tsx           # Deployed project viewer
-鈹?  鈹溾攢鈹€ api/
-鈹?  鈹?  鈹溾攢鈹€ auth/
-鈹?  鈹?  鈹?  鈹溾攢鈹€ [...nextauth]/
-鈹?  鈹?  鈹?  鈹?  鈹斺攢鈹€ route.ts       # NextAuth.js with multiple providers
-鈹?  鈹?  鈹?  鈹斺攢鈹€ register/
-鈹?  鈹?  鈹?      鈹斺攢鈹€ route.ts       # User registration API
-鈹?  鈹?  鈹溾攢鈹€ projects/
-鈹?  鈹?  鈹?  鈹溾攢鈹€ route.ts           # User-specific projects API with landing page data
-鈹?  鈹?  鈹?  鈹斺攢鈹€ [id]/
-鈹?  鈹?  鈹?      鈹斺攢鈹€ deploy/
-鈹?  鈹?  鈹?          鈹斺攢鈹€ route.ts   # Project deployment API
-鈹?  鈹?  鈹斺攢鈹€ deployed/
-鈹?  鈹?      鈹斺攢鈹€ [...slug]/
-鈹?  鈹?          鈹斺攢鈹€ route.ts       # Static asset serving for deployed projects
-鈹?  鈹溾攢鈹€ layout.tsx                 # Root layout with session provider
-鈹?  鈹斺攢鈹€ globals.css                # Global styles with Tailwind CSS v4
-鈹溾攢鈹€ components/
-鈹?  鈹溾攢鈹€ AuthProvider.tsx           # NextAuth session provider wrapper
-鈹?  鈹溾攢鈹€ landing-page/
-鈹?  鈹?  鈹溾攢鈹€ Navbar1.tsx            # Auto-generated editable navbar with wrapper components
-鈹?  鈹?  鈹斺攢鈹€ Layout1.tsx            # Auto-generated editable hero section with wrapper components
-鈹?  鈹溾攢鈹€ landing-page-original/     # Original component source files (backup)
-鈹?  鈹?  鈹溾攢鈹€ Navbar1.tsx            # Original navbar component source
-鈹?  鈹?  鈹斺攢鈹€ Layout1.tsx            # Original hero section component source
-鈹?  鈹溾攢鈹€ editable/                  # Comprehensive editable wrapper component library
-鈹?  鈹?  鈹溾攢鈹€ EditContext.tsx        # Context provider for edit state with basePath support
-鈹?  鈹?  鈹溾攢鈹€ EditableText.tsx       # Text editing with smart positioning and validation
-鈹?  鈹?  鈹溾攢鈹€ EditableImage.tsx      # Image editing with URL and alt text support
-鈹?  鈹?  鈹溾攢鈹€ EditableLink.tsx       # Link editing with URL and text modification
-鈹?  鈹?  鈹溾攢鈹€ EditableButton.tsx     # Button editing with variant and content support
-鈹?  鈹?  鈹溾攢鈹€ EditableArray.tsx      # Generic array container with layout transparency
-鈹?  鈹?  鈹溾攢鈹€ EditableDropdownTitle.tsx # Specialized dropdown menu title editing
-鈹?  鈹?  鈹溾攢鈹€ useSmartPosition.ts    # Smart positioning hook with viewport boundary detection
-鈹?  鈹?  鈹斺攢鈹€ index.ts               # Centralized exports for all editable components
-鈹?  鈹溾攢鈹€ renderers/                 # Component rendering tools
-鈹?  鈹?  鈹溾攢鈹€ BlockRenderer.tsx      # Dynamic component renderer
-鈹?  鈹?  鈹斺攢鈹€ ValidatedBlockRenderer.tsx # Server-validated component renderer with basePath
-鈹?  鈹溾攢鈹€ meta/                      # Auto-generated component metadata
-鈹?  鈹?  鈹溾攢鈹€ Navbar1.meta.json      # Navbar1 component schema and defaults
-鈹?  鈹?  鈹斺攢鈹€ Layout1.meta.json      # Layout1 component schema and defaults
-鈹?  鈹溾攢鈹€ common/                    # Comprehensive UI component library
-鈹?  鈹?  鈹溾攢鈹€ Button.tsx             # Multi-variant button component
-鈹?  鈹?  鈹溾攢鈹€ Dialog.tsx             # Modal dialog system
-鈹?  鈹?  鈹溾攢鈹€ Accordion.tsx          # Collapsible content sections
-鈹?  鈹?  鈹溾攢鈹€ Carousel.tsx           # Image/content carousel with Embla
-鈹?  鈹?  鈹溾攢鈹€ Sidebar.tsx            # Navigation sidebar component
-鈹?  鈹?  鈹斺攢鈹€ [20+ other components] # Complete UI component ecosystem
-鈹?  鈹斺攢鈹€ utils/
-鈹?      鈹溾攢鈹€ cn.ts                  # Class name utility functions
-鈹?      鈹斺攢鈹€ colorUtils.ts          # Color manipulation utilities
-鈹溾攢鈹€ config/
-鈹?  鈹溾攢鈹€ tailwind.custom.config.js  # Isolated Tailwind configuration for editing
-鈹?  鈹斺攢鈹€ tailwind.utils.js          # Config utilities for reuse (editing + deploy)
-鈹溾攢鈹€ lib/
-鈹?  鈹溾攢鈹€ userService.ts             # User management and authentication with database operations
-鈹?  鈹溾攢鈹€ projectService.ts          # Project management with data validation integration
-鈹?  鈹溾攢鈹€ database.ts                # JSON file-based database layer
-鈹?  鈹溾攢鈹€ componentMetaGenerator.ts  # TypeScript-based component metadata generator
-鈹?  鈹斺攢鈹€ componentDataValidator.ts  # Server-side data validation and merging
-鈹溾攢鈹€ types/
-鈹?  鈹溾攢鈹€ next-auth.d.ts             # TypeScript declarations for NextAuth
-鈹?  鈹斺攢鈹€ component-meta.ts          # Component metadata type definitions
-鈹斺攢鈹€ scripts/                       # Automation and utility scripts
-    鈹溾攢鈹€ generate-meta.ts           # Generate component metadata from source
-    鈹溾攢鈹€ test-validation.ts         # Test data validation functionality
-    鈹溾攢鈹€ clean-project-data.ts      # Clean and normalize existing project data
-    鈹溾攢鈹€ copy-components.ts         # Copy original components to backup directory
-    鈹斺攢鈹€ transform-components.ts    # Automated component transformation to editable versions
+├── app/
+�?  ├── page.tsx                    # Landing page with auth-aware UI
+�?  ├── auth/
+�?  �?  ├── signin/
+�?  �?  �?  └── page.tsx           # Multi-provider login page
+�?  �?  └── register/
+�?  �?      └── page.tsx           # Email/password registration
+�?  ├── dashboard/
+�?  �?  └── page.tsx               # Protected dashboard with user projects
+�?  ├── preview/
+�?  �?  └── [id]/
+�?  �?      └── page.tsx           # iframe-based editing interface with toolbar
+�?  ├── edit-frame/
+�?  �?  ├── [id]/
+�?  �?  �?  └── page.tsx           # Isolated editing environment (iframe content)
+�?  �?  └── layout.tsx             # Custom layout with isolated Tailwind config
+�?  ├── preview-static/
+�?  �?  ├── [id]/
+�?  �?  �?  └── page.tsx           # Static preview mode (non-editable)
+�?  �?  └── layout.tsx             # Custom layout with identical Tailwind config as edit-frame
+�?  ├── deployed/
+�?  �?  └── [subdomain]/
+�?  �?      └── page.tsx           # Deployed project viewer
+�?  ├── api/
+�?  �?  ├── auth/
+�?  �?  �?  ├── [...nextauth]/
+�?  �?  �?  �?  └── route.ts       # NextAuth.js with multiple providers
+�?  �?  �?  └── register/
+�?  �?  �?      └── route.ts       # User registration API
+�?  �?  ├── projects/
+�?  �?  �?  ├── route.ts           # User-specific projects API with landing page data
+�?  �?  �?  └── [id]/
+�?  �?  �?      └── deploy/
+�?  �?  �?          └── route.ts   # Project deployment API
+�?  �?  └── deployed/
+�?  �?      └── [...slug]/
+�?  �?          └── route.ts       # Static asset serving for deployed projects
+�?  ├── layout.tsx                 # Root layout with session provider
+�?  └── globals.css                # Global styles with Tailwind CSS v4
+├── components/
+�?  ├── AuthProvider.tsx           # NextAuth session provider wrapper
+�?  ├── landing-page/
+�?  �?  ├── Navbar1.tsx            # Auto-generated editable navbar with wrapper components
+�?  �?  └── Layout1.tsx            # Auto-generated editable hero section with wrapper components
+�?  ├── landing-page-original/     # Original component source files (backup)
+�?  �?  ├── Navbar1.tsx            # Original navbar component source
+�?  �?  └── Layout1.tsx            # Original hero section component source
+�?  ├── editable/                  # Comprehensive editable wrapper component library
+�?  �?  ├── EditContext.tsx        # Context provider for edit state with basePath support
+�?  �?  ├── EditableText.tsx       # Text editing with smart positioning and validation
+�?  �?  ├── EditableImage.tsx      # Image editing with URL and alt text support
+�?  �?  ├── EditableLink.tsx       # Link editing with URL and text modification
+�?  �?  ├── EditableButton.tsx     # Button editing with variant and content support
+�?  �?  ├── EditableArray.tsx      # Generic array container with layout transparency
+�?  �?  ├── EditableDropdownTitle.tsx # Specialized dropdown menu title editing
+�?  �?  ├── useSmartPosition.ts    # Smart positioning hook with viewport boundary detection
+�?  �?  └── index.ts               # Centralized exports for all editable components
+�?  ├── renderers/                 # Component rendering tools
+�?  �?  ├── BlockRenderer.tsx      # Dynamic component renderer
+�?  �?  └── ValidatedBlockRenderer.tsx # Server-validated component renderer with basePath
+�?  ├── meta/                      # Auto-generated component metadata
+�?  �?  ├── Navbar1.meta.json      # Navbar1 component schema and defaults
+�?  �?  └── Layout1.meta.json      # Layout1 component schema and defaults
+�?  ├── common/                    # Comprehensive UI component library
+�?  �?  ├── Button.tsx             # Multi-variant button component
+�?  �?  ├── Dialog.tsx             # Modal dialog system
+�?  �?  ├── Accordion.tsx          # Collapsible content sections
+�?  �?  ├── Carousel.tsx           # Image/content carousel with Embla
+�?  �?  ├── Sidebar.tsx            # Navigation sidebar component
+�?  �?  └── [20+ other components] # Complete UI component ecosystem
+�?  └── utils/
+�?      ├── cn.ts                  # Class name utility functions
+�?      └── colorUtils.ts          # Color manipulation utilities
+├── config/
+�?  ├── tailwind.custom.config.js  # Isolated Tailwind configuration for editing
+�?  └── tailwind.utils.js          # Config utilities for reuse (editing + deploy)
+├── lib/
+�?  ├── userService.ts             # User management and authentication with database operations
+�?  ├── projectService.ts          # Project management with data validation integration
+�?  ├── database.ts                # JSON file-based database layer
+�?  ├── componentMetaGenerator.ts  # TypeScript-based component metadata generator
+�?  └── componentDataValidator.ts  # Server-side data validation and merging
+├── types/
+�?  ├── next-auth.d.ts             # TypeScript declarations for NextAuth
+�?  └── component-meta.ts          # Component metadata type definitions
+└── scripts/                       # Automation and utility scripts
+    ├── generate-meta.ts           # Generate component metadata from source
+    ├── test-validation.ts         # Test data validation functionality
+    ├── clean-project-data.ts      # Clean and normalize existing project data
+    ├── copy-components.ts         # Copy original components to backup directory
+    └── transform-components.ts    # Automated component transformation to editable versions
 data/                              # JSON database files (auto-created, git-ignored)
-鈹溾攢鈹€ users.json                    # User accounts and authentication data
-鈹溾攢鈹€ projects.json                 # Project data with landing page content
-鈹斺攢鈹€ deployment_status.json        # Deployment status tracking
+├── users.json                    # User accounts and authentication data
+├── projects.json                 # Project data with landing page content
+└── deployment_status.json        # Deployment status tracking
 template/                          # React project template for deployment
-鈹溾攢鈹€ package.json                   # Template dependencies (React 18, Vite 4)
-鈹溾攢鈹€ vite.config.ts                # Vite build configuration with SWC
-鈹溾攢鈹€ src/
-鈹?  鈹溾攢鈹€ App.tsx                   # Template app component
-鈹?  鈹溾攢鈹€ main.tsx                  # React entry point
-鈹?  鈹斺攢鈹€ components/               # Reusable components (generated from main project)
-鈹斺攢鈹€ public/                       # Static assets
-generated-sites/                   # Generated project builds (git-ignored)
-鈹溾攢鈹€ [projectId]/                  # Individual project directories
-鈹?  鈹溾攢鈹€ dist/                     # Built static files
-鈹?  鈹斺攢鈹€ src/                      # Source code with adapted components
+├── package.json                   # Template dependencies (React 18, Vite 4)
+├── vite.config.ts                # Vite build configuration with SWC
+������ src/
+|  ������ App.tsx                   # Template app component
+|  ������ main.tsx                  # React entry point
+|  ������ components/               # Reusable components (generated from main project)
+|  ������ editable/                 # Lightweight no-op editable wrappers used by generated projects
+������ public/                       # Static assets
+├── [projectId]/                  # Individual project directories
+�?  ├── dist/                     # Built static files
+�?  └── src/                      # Source code with adapted components
 middleware.ts                     # Subdomain routing middleware
 ```
 
@@ -152,7 +152,7 @@ middleware.ts                     # Subdomain routing middleware
 - **Project Management**:
   - User-specific project cards with real-time status updates
   - Loading states with animated spinners for generating projects
-  - Status badges (generating 鈫?completed with 3-second simulation)
+  - Status badges (generating �?completed with 3-second simulation)
   - Actions (Edit/Deploy/View for completed projects)
   - Edit functionality opens generated landing pages for editing
   - **Deploy functionality**: Full deployment with progress tracking
@@ -198,7 +198,7 @@ middleware.ts                     # Subdomain routing middleware
 - **iframe Isolation Architecture**: Complete style and script isolation using iframe sandboxing
 - **Single-iframe Architecture**: Unified iframe system supporting both edit and preview modes for optimal performance
 - **Interactive Editing Toolbar**:
-  - **Centered Mode Toggle**: Edit 鈫?Preview mode switching with centered button layout for improved visual balance
+  - **Centered Mode Toggle**: Edit �?Preview mode switching with centered button layout for improved visual balance
   - **Undo/Redo Controls**: Full history management with visual buttons and keyboard shortcuts (Ctrl+Z, Ctrl+Y)
     - Smart disabled states when no operations are available
     - Real-time visual feedback for available actions
@@ -323,6 +323,7 @@ interface PropertyDefinition {
 - **React+TypeScript+Tailwind Template**: Complete project template with modern tooling and comprehensive dependencies
 - **Configuration-Driven Component Cloning**: Universal system that intelligently extracts and adapts components from main app
 - **Metadata-Driven Defaults**: Generates seed content from component metadata (Navbar1, Header3, etc.) via `buildDefaultLandingPageData`
+- **Editable Wrapper Stubs**: Template includes lightweight `src/editable` no-op components so generated builds compile without editor context
 - **Smart Dependency Detection**: Automatic scanning and import generation for external libraries (React Icons, Framer Motion, etc.)
 - **Vite Build System**: Fast development and optimized production builds with relaxed TypeScript strictness
 - **Asset Optimization**: Automatic asset bundling and optimization with CDN fallback support
@@ -359,19 +360,19 @@ interface PropertyDefinition {
 ### Generated Project Structure
 ```
 generated-sites/[projectId]/
-鈹溾攢鈹€ dist/                         # Built static files
-鈹?  鈹斺攢鈹€ index.html               # Standalone HTML with CDN resources or Vite build output
-鈹溾攢鈹€ src/
-鈹?  鈹溾攢鈹€ App.tsx                  # Generated app component with proper imports
-鈹?  鈹溾攢鈹€ global.d.ts              # Auto-generated TypeScript declarations
-鈹?  鈹斺攢鈹€ components/
-鈹?      鈹溾攢鈹€ Navbar1.tsx          # Original component with smart imports
-鈹?      鈹溾攢鈹€ Layout1.tsx          # Original component with smart imports
-鈹?      鈹溾攢鈹€ common/              # Complete UI component library
-鈹?      鈹斺攢鈹€ utils/               # Utility functions and helpers
-鈹溾攢鈹€ package.json                 # React 18 + Vite 4 + full Radix UI dependencies
-鈹溾攢鈹€ tsconfig.json                # Relaxed TypeScript configuration
-鈹斺攢鈹€ vite.config.ts               # SWC build configuration
+├── dist/                         # Built static files
+�?  └── index.html               # Standalone HTML with CDN resources or Vite build output
+├── src/
+�?  ├── App.tsx                  # Generated app component with proper imports
+�?  ├── global.d.ts              # Auto-generated TypeScript declarations
+�?  └── components/
+�?      ├── Navbar1.tsx          # Original component with smart imports
+�?      ├── Layout1.tsx          # Original component with smart imports
+�?      ├── common/              # Complete UI component library
+�?      └── utils/               # Utility functions and helpers
+├── package.json                 # React 18 + Vite 4 + full Radix UI dependencies
+├── tsconfig.json                # Relaxed TypeScript configuration
+└── vite.config.ts               # SWC build configuration
 ```
 
 ### Deployment Features
@@ -380,7 +381,7 @@ generated-sites/[projectId]/
   - **Windows Optimization**: Robocopy-based dependency sharing with proper exit code handling (0-7 success range)
   - **Unix/Linux/Mac Optimization**: Instant symlink creation for zero-copy dependency sharing
   - **Intelligent Fallback**: Automatic graceful degradation to npm install if shared dependencies fail
-  - **Performance Improvement**: First deployment ~3 minutes 鈫?Subsequent deployments ~1 minute
+  - **Performance Improvement**: First deployment ~3 minutes �?Subsequent deployments ~1 minute
 - **Comprehensive Performance Monitoring**: Detailed deployment timing system with millisecond precision
   - **Phase-by-Phase Tracking**: Individual timing for template copying, component processing, dependency setup, and Vite builds
   - **ISO Timestamps**: Precise deployment timeline with emoji indicators for easy log reading
@@ -405,9 +406,9 @@ generated-sites/[projectId]/
 ### Database Structure
 ```
 data/
-鈹溾攢鈹€ users.json                    # User accounts with authentication data
-鈹溾攢鈹€ projects.json                 # Project content and metadata
-鈹斺攢鈹€ deployment_status.json        # Deployment progress tracking
+├── users.json                    # User accounts with authentication data
+├── projects.json                 # Project content and metadata
+└── deployment_status.json        # Deployment progress tracking
 ```
 
 ### Data Models
@@ -854,7 +855,7 @@ interface Header3Props {
 
 ## Current Implementation Status
 
-### 鉁?Completed Features
+### �?Completed Features
 - **Authentication System**: Multi-provider login (Google OAuth + Email/Password) with persistent sessions
 - **Data Persistence**: JSON file-based database with user accounts, projects, and deployment status
 - **Project Management**: Complete CRUD operations with user isolation and real-time status updates
@@ -918,11 +919,11 @@ interface Header3Props {
 - **User Interface**: Responsive dashboard with project cards, status tracking, and deployment controls
 - **Security**: bcrypt password hashing, session validation, and secure API endpoints
 
-### 馃攧 In Progress
+### 🔄 In Progress
 - **Advanced Component Editor**: Rich editing interface for complex component properties, including adding and removing items from arrays.
 - **Performance Optimization**: Caching strategies for iframe content and component rendering
 
-### 馃搵 Planned Enhancements
+### 📋 Planned Enhancements
 - **Component Library Expansion**: Additional Relume-style components and templates with automatic metadata generation
 - **AI Integration**: Connecting to actual AI services for landing page content generation
 - **Database Migration**: Upgrade path to SQLite/PostgreSQL for production scaling
@@ -982,13 +983,19 @@ interface Header3Props {
 - **This ensures consistency** and prevents manual changes from being overwritten
 
 ### Developer Experience
-- **Testing Suite**: Comprehensive test coverage for authentication, database operations, and deployment flows
+- **Testing Suite**: Comprehensive test coverage for authentication, database operations, and deployment flows (includes deploy integration test that generates a project and requires `npm run build` to succeed, surfacing Vite stderr on failure)
 - **API Documentation**: OpenAPI/Swagger documentation for all endpoints
 - **Database Migrations**: Automated migration scripts from JSON to SQL databases
 - **Performance Monitoring**: Application metrics and database query optimization
 - **CI/CD Pipeline**: Automated testing, building, and deployment workflows
 - **Docker Support**: Containerization for consistent deployment environments
 - **Backup Automation**: Scheduled data backups and integrity verification
+
+
+
+
+
+
 
 
 
