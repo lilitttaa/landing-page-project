@@ -13,7 +13,7 @@
     "test-validation": "npx tsx scripts/test-validation.ts",
     "clean-data": "npx tsx scripts/clean-project-data.ts",
     "prepare-shared-deps": "node scripts/prepare-shared-deps.js",
-    "transform-components": "npx tsx scripts/transform-components.ts"
+    "transform-components": "npx tsx scripts/transform-components.ts transform"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.12",
