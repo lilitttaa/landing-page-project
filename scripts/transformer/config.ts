@@ -13,6 +13,11 @@ export const EDITABLE_IMPORTS = [
 
 export const TRANSFORM_RULES: TransformRule[] = [
   {
+    pattern: /^["']use client["'];?\s*/m,
+    replacement: () => '',
+    description: 'Remove client component directive to allow SSR'
+  },
+  {
     pattern: /from ["']@relume_io\/relume-ui["']/g,
     replacement: () => 'from "../common"',
     description: 'Map Relume UI imports to shared common components'

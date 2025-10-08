@@ -1,4 +1,3 @@
-"use client";
 import { useState } from "react";
 import { Button, Dialog, DialogContent, DialogTrigger } from "../common";
 import type { ButtonProps } from "../common";

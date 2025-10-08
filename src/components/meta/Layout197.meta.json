@@ -1,0 +1,86 @@
+{
+  "componentName": "Layout197",
+  "version": "1.0.0",
+  "properties": {
+    "heading": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string",
+      "required": true
+    },
+    "image": {
+      "type": "object",
+      "required": true
+    },
+    "subHeadings": {
+      "type": "array",
+      "arrayItemType": {
+        "type": "object"
+      },
+      "required": true
+    }
+  },
+  "types": {
+    "ImageProps": {
+      "src": {
+        "type": "string",
+        "required": true
+      },
+      "alt": {
+        "type": "string",
+        "required": false
+      }
+    },
+    "SubHeadingProps": {
+      "title": {
+        "type": "string",
+        "required": true
+      },
+      "description": {
+        "type": "string",
+        "required": true
+      }
+    },
+    "Props": {
+      "heading": {
+        "type": "string",
+        "required": true
+      },
+      "description": {
+        "type": "string",
+        "required": true
+      },
+      "image": {
+        "type": "object",
+        "required": true
+      },
+      "subHeadings": {
+        "type": "array",
+        "arrayItemType": {
+          "type": "object"
+        },
+        "required": true
+      }
+    }
+  },
+  "defaults": {
+    "heading": "Long heading is what you see here in this feature section",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.",
+    "image": {
+      "src": "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
+      "alt": "Relume placeholder image"
+    },
+    "subHeadings": [
+      {
+        "title": "Subheading one",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros."
+      },
+      {
+        "title": "Subheading two",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros."
+      }
+    ]
+  }
+}

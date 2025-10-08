@@ -1,0 +1,135 @@
+{
+  "componentName": "Layout373",
+  "version": "1.0.0",
+  "properties": {
+    "tagline": {
+      "type": "string",
+      "required": true
+    },
+    "heading": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string",
+      "required": true
+    },
+    "cardsSmall": {
+      "type": "array",
+      "arrayItemType": {
+        "type": "object"
+      },
+      "required": true
+    },
+    "cardBig": {
+      "type": "object",
+      "required": true
+    }
+  },
+  "types": {
+    "ImageProps": {
+      "src": {
+        "type": "string",
+        "required": true
+      },
+      "alt": {
+        "type": "string",
+        "required": false
+      }
+    },
+    "CardBaseProps": {
+      "heading": {
+        "type": "string",
+        "required": true
+      },
+      "description": {
+        "type": "string",
+        "required": true
+      },
+      "icon": {
+        "type": "object",
+        "required": true
+      }
+    },
+    "Props": {
+      "tagline": {
+        "type": "string",
+        "required": true
+      },
+      "heading": {
+        "type": "string",
+        "required": true
+      },
+      "description": {
+        "type": "string",
+        "required": true
+      },
+      "cardsSmall": {
+        "type": "array",
+        "arrayItemType": {
+          "type": "object"
+        },
+        "required": true
+      },
+      "cardBig": {
+        "type": "object",
+        "required": true
+      }
+    }
+  },
+  "defaults": {
+    "tagline": "Tagline",
+    "heading": "Short heading goes here",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    "cardsSmall": [
+      {
+        "icon": {
+          "src": "https://d22po4pjz3o32e.cloudfront.net/relume-icon.svg",
+          "alt": "Relume logo 1"
+        },
+        "heading": "Medium length section heading goes here",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "button": {
+          "title": "Button",
+          "variant": "link",
+          "size": "link",
+          "iconRight": null
+        }
+      },
+      {
+        "icon": {
+          "src": "https://d22po4pjz3o32e.cloudfront.net/relume-icon.svg",
+          "alt": "Relume logo 2"
+        },
+        "heading": "Medium length section heading goes here",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "button": {
+          "title": "Button",
+          "variant": "link",
+          "size": "link",
+          "iconRight": null
+        }
+      }
+    ],
+    "cardBig": {
+      "icon": {
+        "src": "https://d22po4pjz3o32e.cloudfront.net/relume-icon.svg",
+        "alt": "Relume logo 3"
+      },
+      "heading": "Short heading here",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
+      "buttons": [
+        {
+          "title": "Button",
+          "variant": "secondary"
+        },
+        {
+          "title": "Button",
+          "variant": "link",
+          "size": "link",
+          "iconRight": null
+        }
+      ]
+    }
+  }
+}

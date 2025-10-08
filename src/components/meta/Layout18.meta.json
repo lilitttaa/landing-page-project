@@ -1,0 +1,99 @@
+{
+  "componentName": "Layout18",
+  "version": "1.0.0",
+  "properties": {
+    "heading": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string",
+      "required": true
+    },
+    "features": {
+      "type": "array",
+      "arrayItemType": {
+        "type": "object"
+      },
+      "required": true
+    },
+    "image": {
+      "type": "object",
+      "required": true
+    }
+  },
+  "types": {
+    "ImageProps": {
+      "src": {
+        "type": "string",
+        "required": true
+      },
+      "alt": {
+        "type": "string",
+        "required": false
+      }
+    },
+    "FeaturesProps": {
+      "icon": {
+        "type": "object",
+        "required": true
+      },
+      "paragraph": {
+        "type": "string",
+        "required": true
+      }
+    },
+    "Props": {
+      "heading": {
+        "type": "string",
+        "required": true
+      },
+      "description": {
+        "type": "string",
+        "required": true
+      },
+      "features": {
+        "type": "array",
+        "arrayItemType": {
+          "type": "object"
+        },
+        "required": true
+      },
+      "image": {
+        "type": "object",
+        "required": true
+      }
+    }
+  },
+  "defaults": {
+    "heading": "Long heading is what you see here in this feature section",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.",
+    "features": [
+      {
+        "icon": {
+          "src": "https://d22po4pjz3o32e.cloudfront.net/relume-icon.svg",
+          "alt": "Relume logo 1"
+        },
+        "paragraph": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+      },
+      {
+        "icon": {
+          "src": "https://d22po4pjz3o32e.cloudfront.net/relume-icon.svg",
+          "alt": "Relume logo 2"
+        },
+        "paragraph": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+      },
+      {
+        "icon": {
+          "src": "https://d22po4pjz3o32e.cloudfront.net/relume-icon.svg",
+          "alt": "Relume logo 3"
+        },
+        "paragraph": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+      }
+    ],
+    "image": {
+      "src": "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
+      "alt": "Relume placeholder image"
+    }
+  }
+}

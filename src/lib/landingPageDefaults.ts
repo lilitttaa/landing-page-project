@@ -1,11 +1,13 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { ComponentDataValidator } from './componentDataValidator';
 
 interface LandingPageBlockConfig {
   type: string;
   subtype: string;
   overrides?:
-    | Record<string, any>
-    | ((context: { projectId: string; description?: string }) => Record<string, any>);
+    | Record<string, unknown>
+    | ((context: { projectId: string; description?: string }) => Record<string, unknown>);
 }
 
 export interface LandingPageBlock {
@@ -17,29 +19,42 @@ export interface LandingPageBlock {
 export interface LandingPageData {
   sitemap: string[];
   blocks: Record<string, LandingPageBlock>;
-  block_contents: Record<string, Record<string, any>>;
+  block_contents: Record<string, Record<string, unknown>>;
 }
 
 const componentDataValidator = new ComponentDataValidator();
 
-const DEFAULT_BLOCK_CONFIG: LandingPageBlockConfig[] = [
-  {
-    type: 'navbar',
-    subtype: 'Navbar1',
-  },
-  {
-    type: 'hero_header_section',
-    subtype: 'Header3',
-    overrides: ({ description }) => ({
-      heading: description?.trim() || 'Build Beautiful Landing Pages',
-    }),
-  },
-];
+const LANDING_PAGE_COMPONENT_DIR = path.join(
+  process.cwd(),
+  'src/components/landing-page'
+);
+
+const DEFAULT_BLOCK_CONFIG: LandingPageBlockConfig[] = (() => {
+  try {
+    const entries = fs.readdirSync(LANDING_PAGE_COMPONENT_DIR, {
+      withFileTypes: true,
+    });
+
+    return entries
+      .filter((entry) => entry.isFile() && entry.name.endsWith('.tsx'))
+      .map((entry) => entry.name.replace(/\.tsx$/, ''))
+      .sort((a, b) => a.localeCompare(b))
+      .map((componentName) => {
+        return { type: componentName, subtype: componentName };
+      });
+  } catch (error) {
+    console.warn(
+      'Unable to load landing page components for defaults:',
+      error
+    );
+    return [];
+  }
+})();
 
 function getBlockContent(
   subtype: string,
-  overrides: Record<string, any>
-): Record<string, any> {
+  overrides: Record<string, unknown>
+): Record<string, unknown> {
   try {
     return componentDataValidator.mergeWithDefaults(subtype, overrides);
   } catch (error) {
@@ -54,7 +69,7 @@ export function buildDefaultLandingPageData(context: {
 }): LandingPageData {
   const sitemap: string[] = [];
   const blocks: Record<string, LandingPageBlock> = {};
-  const blockContents: Record<string, Record<string, any>> = {};
+  const blockContents: Record<string, Record<string, unknown>> = {};
 
   DEFAULT_BLOCK_CONFIG.forEach((config, index) => {
     const blockId = `block_${String(index + 1).padStart(3, '0')}`;
