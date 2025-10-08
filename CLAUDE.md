@@ -7,90 +7,90 @@ A Next.js 15.5.4 TypeScript application for creating and managing landing pages 
 ```
 src/
 ├── app/
-�?  ├── page.tsx                    # Landing page with auth-aware UI
-�?  ├── auth/
-�?  �?  ├── signin/
-�?  �?  �?  └── page.tsx           # Multi-provider login page
-�?  �?  └── register/
-�?  �?      └── page.tsx           # Email/password registration
-�?  ├── dashboard/
-�?  �?  └── page.tsx               # Protected dashboard with user projects
-�?  ├── preview/
-�?  �?  └── [id]/
-�?  �?      └── page.tsx           # iframe-based editing interface with toolbar
-�?  ├── edit-frame/
-�?  �?  ├── [id]/
-�?  �?  �?  └── page.tsx           # Isolated editing environment (iframe content)
-�?  �?  └── layout.tsx             # Custom layout with isolated Tailwind config
-�?  ├── preview-static/
-�?  �?  ├── [id]/
-�?  �?  �?  └── page.tsx           # Static preview mode (non-editable)
-�?  �?  └── layout.tsx             # Custom layout with identical Tailwind config as edit-frame
-�?  ├── deployed/
-�?  �?  └── [subdomain]/
-�?  �?      └── page.tsx           # Deployed project viewer
-�?  ├── api/
-�?  �?  ├── auth/
-�?  �?  �?  ├── [...nextauth]/
-�?  �?  �?  �?  └── route.ts       # NextAuth.js with multiple providers
-�?  �?  �?  └── register/
-�?  �?  �?      └── route.ts       # User registration API
-�?  �?  ├── projects/
-�?  �?  �?  ├── route.ts           # User-specific projects API with landing page data
-�?  �?  �?  └── [id]/
-�?  �?  �?      └── deploy/
-�?  �?  �?          └── route.ts   # Project deployment API
-�?  �?  └── deployed/
-�?  �?      └── [...slug]/
-�?  �?          └── route.ts       # Static asset serving for deployed projects
-�?  ├── layout.tsx                 # Root layout with session provider
-�?  └── globals.css                # Global styles with Tailwind CSS v4
+│  ├── page.tsx                    # Landing page with auth-aware UI
+│  ├── auth/
+│  │  ├── signin/
+│  │  │  └── page.tsx           # Multi-provider login page
+│  │  └── register/
+│  │      └── page.tsx           # Email/password registration
+│  ├── dashboard/
+│  │  └── page.tsx               # Protected dashboard with user projects
+│  ├── preview/
+│  │  └── [id]/
+│  │      └── page.tsx           # iframe-based editing interface with toolbar
+│  ├── edit-frame/
+│  │  ├── [id]/
+│  │  │  └── page.tsx           # Isolated editing environment (iframe content)
+│  │  └── layout.tsx             # Custom layout with isolated Tailwind config
+│  ├── preview-static/
+│  │  ├── [id]/
+│  │  │  └── page.tsx           # Static preview mode (non-editable)
+│  │  └── layout.tsx             # Custom layout with identical Tailwind config as edit-frame
+│  ├── deployed/
+│  │  └── [subdomain]/
+│  │      └── page.tsx           # Deployed project viewer
+│  ├── api/
+│  │  ├── auth/
+│  │  │  ├── [...nextauth]/
+│  │  │  │  └── route.ts       # NextAuth.js with multiple providers
+│  │  │  └── register/
+│  │  │      └── route.ts       # User registration API
+│  │  ├── projects/
+│  │  │  ├── route.ts           # User-specific projects API with landing page data
+│  │  │  └── [id]/
+│  │  │      └── deploy/
+│  │  │          └── route.ts   # Project deployment API
+│  │  └── deployed/
+│  │      └── [...slug]/
+│  │          └── route.ts       # Static asset serving for deployed projects
+│  ├── layout.tsx                 # Root layout with session provider
+│  └── globals.css                # Global styles with Tailwind CSS v4
 ├── components/
-�?  ├── AuthProvider.tsx           # NextAuth session provider wrapper
-�?  ├── landing-page/
-�?  �?  ├── Navbar1.tsx            # Auto-generated editable navbar with wrapper components
-�?  �?  └── Layout1.tsx            # Auto-generated editable hero section with wrapper components
-�?  ├── landing-page-original/     # Original component source files (backup)
-�?  �?  ├── Navbar1.tsx            # Original navbar component source
-�?  �?  └── Layout1.tsx            # Original hero section component source
-�?  ├── editable/                  # Comprehensive editable wrapper component library
-�?  �?  ├── EditContext.tsx        # Context provider for edit state with basePath support
-�?  �?  ├── EditableText.tsx       # Text editing with smart positioning and validation
-�?  �?  ├── EditableImage.tsx      # Image editing with URL and alt text support
-�?  �?  ├── EditableLink.tsx       # Link editing with URL and text modification
-�?  �?  ├── EditableButton.tsx     # Button editing with variant and content support
-�?  �?  ├── EditableArray.tsx      # Generic array container with layout transparency
-�?  �?  ├── EditableDropdownTitle.tsx # Specialized dropdown menu title editing
-�?  �?  ├── useSmartPosition.ts    # Smart positioning hook with viewport boundary detection
-�?  �?  └── index.ts               # Centralized exports for all editable components
-�?  ├── renderers/                 # Component rendering tools
-�?  �?  ├── BlockRenderer.tsx      # Dynamic component renderer
-�?  �?  └── ValidatedBlockRenderer.tsx # Server-validated component renderer with basePath
-�?  ├── meta/                      # Auto-generated component metadata
-�?  �?  ├── Navbar1.meta.json      # Navbar1 component schema and defaults
-�?  �?  └── Layout1.meta.json      # Layout1 component schema and defaults
-�?  ├── common/                    # Comprehensive UI component library
-�?  �?  ├── Button.tsx             # Multi-variant button component
-�?  �?  ├── Dialog.tsx             # Modal dialog system
-�?  �?  ├── Accordion.tsx          # Collapsible content sections
-�?  �?  ├── Carousel.tsx           # Image/content carousel with Embla
-�?  �?  ├── Sidebar.tsx            # Navigation sidebar component
-�?  �?  └── [20+ other components] # Complete UI component ecosystem
-�?  └── utils/
-�?      ├── cn.ts                  # Class name utility functions
-�?      └── colorUtils.ts          # Color manipulation utilities
+│  ├── AuthProvider.tsx           # NextAuth session provider wrapper
+│  ├── landing-page/
+│  │  ├── Navbar1.tsx            # Auto-generated editable navbar with wrapper components
+│  │  └── Layout1.tsx            # Auto-generated editable hero section with wrapper components
+│  ├── landing-page-original/     # Original component source files (backup)
+│  │  ├── Navbar1.tsx            # Original navbar component source
+│  │  └── Layout1.tsx            # Original hero section component source
+│  ├── editable/                  # Comprehensive editable wrapper component library
+│  │  ├── EditContext.tsx        # Context provider for edit state with basePath support
+│  │  ├── EditableText.tsx       # Text editing with smart positioning and validation
+│  │  ├── EditableImage.tsx      # Image editing with URL and alt text support
+│  │  ├── EditableLink.tsx       # Link editing with URL and text modification
+│  │  ├── EditableButton.tsx     # Button editing with variant and content support
+│  │  ├── EditableArray.tsx      # Generic array container with layout transparency
+│  │  ├── EditableDropdownTitle.tsx # Specialized dropdown menu title editing
+│  │  ├── useSmartPosition.ts    # Smart positioning hook with viewport boundary detection
+│  │  └── index.ts               # Centralized exports for all editable components
+│  ├── renderers/                 # Component rendering tools
+│  │  ├── BlockRenderer.tsx      # Dynamic component renderer
+│  │  └── ValidatedBlockRenderer.tsx # Server-validated component renderer with basePath
+│  ├── meta/                      # Auto-generated component metadata
+│  │  ├── Navbar1.meta.json      # Navbar1 component schema and defaults
+│  │  └── Layout1.meta.json      # Layout1 component schema and defaults
+│  ├── common/                    # Comprehensive UI component library
+│  │  ├── Button.tsx             # Multi-variant button component
+│  │  ├── Dialog.tsx             # Modal dialog system
+│  │  ├── Accordion.tsx          # Collapsible content sections
+│  │  ├── Carousel.tsx           # Image/content carousel with Embla
+│  │  ├── Sidebar.tsx            # Navigation sidebar component
+│  │  └── [20+ other components] # Complete UI component ecosystem
+│  └── utils/
+│      ├── cn.ts                  # Class name utility functions
+│      └── colorUtils.ts          # Color manipulation utilities
 ├── config/
-�?  ├── tailwind.custom.config.js  # Isolated Tailwind configuration for editing
-�?  └── tailwind.utils.js          # Config utilities for reuse (editing + deploy)
+│  ├── tailwind.custom.config.js  # Isolated Tailwind configuration for editing
+│  └── tailwind.utils.js          # Config utilities for reuse (editing + deploy)
 ├── lib/
-�?  ├── userService.ts             # User management and authentication with database operations
-�?  ├── projectService.ts          # Project management with data validation integration
-�?  ├── database.ts                # JSON file-based database layer
-�?  ├── componentMetaGenerator.ts  # TypeScript-based component metadata generator
-�?  └── componentDataValidator.ts  # Server-side data validation and merging
+│  ├── userService.ts             # User management and authentication with database operations
+│  ├── projectService.ts          # Project management with data validation integration
+│  ├── database.ts                # JSON file-based database layer
+│  ├── componentMetaGenerator.ts  # TypeScript-based component metadata generator
+│  └── componentDataValidator.ts  # Server-side data validation and merging
 ├── types/
-�?  ├── next-auth.d.ts             # TypeScript declarations for NextAuth
-�?  └── component-meta.ts          # Component metadata type definitions
+│  ├── next-auth.d.ts             # TypeScript declarations for NextAuth
+│  └── component-meta.ts          # Component metadata type definitions
 └── scripts/                       # Automation and utility scripts
     ├── generate-meta.ts           # Generate component metadata from source
     ├── test-validation.ts         # Test data validation functionality
@@ -104,15 +104,15 @@ data/                              # JSON database files (auto-created, git-igno
 template/                          # React project template for deployment
 ├── package.json                   # Template dependencies (React 18, Vite 4)
 ├── vite.config.ts                # Vite build configuration with SWC
-������ src/
-|  ������ App.tsx                   # Template app component
-|  ������ main.tsx                  # React entry point
-|  ������ components/               # Reusable components (generated from main project)
-|  ������ editable/                 # Lightweight no-op editable wrappers used by generated projects
-������ public/                       # Static assets
+├── src/
+|  ├── App.tsx                   # Template app component
+|  ├── main.tsx                  # React entry point
+|  ├── components/               # Reusable components (generated from main project)
+|  └── editable/                 # Lightweight no-op editable wrappers used by generated projects
+└── public/                       # Static assets
 ├── [projectId]/                  # Individual project directories
-�?  ├── dist/                     # Built static files
-�?  └── src/                      # Source code with adapted components
+│  ├── dist/                     # Built static files
+│  └── src/                      # Source code with adapted components
 middleware.ts                     # Subdomain routing middleware
 ```
 
@@ -152,7 +152,7 @@ middleware.ts                     # Subdomain routing middleware
 - **Project Management**:
   - User-specific project cards with real-time status updates
   - Loading states with animated spinners for generating projects
-  - Status badges (generating �?completed with 3-second simulation)
+  - Status badges (generating → completed with 3-second simulation)
   - Actions (Edit/Deploy/View for completed projects)
   - Edit functionality opens generated landing pages for editing
   - **Deploy functionality**: Full deployment with progress tracking
@@ -198,7 +198,7 @@ middleware.ts                     # Subdomain routing middleware
 - **iframe Isolation Architecture**: Complete style and script isolation using iframe sandboxing
 - **Single-iframe Architecture**: Unified iframe system supporting both edit and preview modes for optimal performance
 - **Interactive Editing Toolbar**:
-  - **Centered Mode Toggle**: Edit �?Preview mode switching with centered button layout for improved visual balance
+  - **Centered Mode Toggle**: Edit → Preview mode switching with centered button layout for improved visual balance
   - **Undo/Redo Controls**: Full history management with visual buttons and keyboard shortcuts (Ctrl+Z, Ctrl+Y)
     - Smart disabled states when no operations are available
     - Real-time visual feedback for available actions
@@ -361,15 +361,15 @@ interface PropertyDefinition {
 ```
 generated-sites/[projectId]/
 ├── dist/                         # Built static files
-�?  └── index.html               # Standalone HTML with CDN resources or Vite build output
+│  └── index.html               # Standalone HTML with CDN resources or Vite build output
 ├── src/
-�?  ├── App.tsx                  # Generated app component with proper imports
-�?  ├── global.d.ts              # Auto-generated TypeScript declarations
-�?  └── components/
-�?      ├── Navbar1.tsx          # Original component with smart imports
-�?      ├── Layout1.tsx          # Original component with smart imports
-�?      ├── common/              # Complete UI component library
-�?      └── utils/               # Utility functions and helpers
+│  ├── App.tsx                  # Generated app component with proper imports
+│  ├── global.d.ts              # Auto-generated TypeScript declarations
+│  └── components/
+│      ├── Navbar1.tsx          # Original component with smart imports
+│      ├── Layout1.tsx          # Original component with smart imports
+│      ├── common/              # Complete UI component library
+│      └── utils/               # Utility functions and helpers
 ├── package.json                 # React 18 + Vite 4 + full Radix UI dependencies
 ├── tsconfig.json                # Relaxed TypeScript configuration
 └── vite.config.ts               # SWC build configuration
@@ -381,7 +381,7 @@ generated-sites/[projectId]/
   - **Windows Optimization**: Robocopy-based dependency sharing with proper exit code handling (0-7 success range)
   - **Unix/Linux/Mac Optimization**: Instant symlink creation for zero-copy dependency sharing
   - **Intelligent Fallback**: Automatic graceful degradation to npm install if shared dependencies fail
-  - **Performance Improvement**: First deployment ~3 minutes �?Subsequent deployments ~1 minute
+  - **Performance Improvement**: First deployment ~3 minutes → Subsequent deployments ~1 minute
 - **Comprehensive Performance Monitoring**: Detailed deployment timing system with millisecond precision
   - **Phase-by-Phase Tracking**: Individual timing for template copying, component processing, dependency setup, and Vite builds
   - **ISO Timestamps**: Precise deployment timeline with emoji indicators for easy log reading
@@ -855,7 +855,7 @@ interface Header3Props {
 
 ## Current Implementation Status
 
-### �?Completed Features
+### ✓Completed Features
 - **Authentication System**: Multi-provider login (Google OAuth + Email/Password) with persistent sessions
 - **Data Persistence**: JSON file-based database with user accounts, projects, and deployment status
 - **Project Management**: Complete CRUD operations with user isolation and real-time status updates
