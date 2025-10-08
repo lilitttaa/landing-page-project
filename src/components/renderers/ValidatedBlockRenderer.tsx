@@ -1,9 +1,11 @@
 import { Navbar1 } from '../landing-page/Navbar1';
 import { Layout1 } from '../landing-page/Layout1';
+import { Header3 } from '../landing-page/Header3';
 
 const componentMap = {
   Navbar1,
   Layout1,
+  Header3,
 };
 
 interface BlockRendererProps {

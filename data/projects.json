@@ -497,5 +497,157 @@
         }
       }
     }
+  },
+  {
+    "id": "1759911319765",
+    "user_id": "1759629070256",
+    "description": "3",
+    "status": "completed",
+    "deployed": false,
+    "created_at": "2025-10-08T08:15:19.765Z",
+    "updated_at": "2025-10-08T08:15:22.782Z",
+    "name": "Landing Page #1759911319765",
+    "landing_page_data": {
+      "sitemap": [
+        "block_001",
+        "block_002"
+      ],
+      "blocks": {
+        "block_001": {
+          "type": "navbar",
+          "subtype": "Navbar1",
+          "content": "content_001"
+        },
+        "block_002": {
+          "type": "hero_header_section",
+          "subtype": "Header3",
+          "content": "content_002"
+        }
+      },
+      "block_contents": {
+        "content_001": {
+          "logo": {
+            "url": "#",
+            "src": "/logo.png",
+            "alt": "Logo image"
+          },
+          "navLinks": [
+            {
+              "title": "Features",
+              "url": "#"
+            },
+            {
+              "title": "Pricing",
+              "url": "#"
+            },
+            {
+              "title": "About",
+              "url": "#"
+            }
+          ],
+          "buttons": [
+            {
+              "title": "Get Started",
+              "variant": "secondary",
+              "size": "sm"
+            }
+          ]
+        },
+        "content_002": {
+          "heading": "Build Beautiful Landing Pages",
+          "description": "Create stunning landing pages with AI assistance. Fast, beautiful, and conversion-optimized.",
+          "buttons": [
+            {
+              "title": "Get Started"
+            },
+            {
+              "title": "Watch Demo",
+              "variant": "secondary"
+            }
+          ],
+          "video": "https://www.youtube.com/embed/8DKLYsikxTs?si=Ch9W0KrDWWUiCMMW",
+          "image": {
+            "src": "https://d22po4pjz3o32e.cloudfront.net/placeholder-video-thumbnail.svg",
+            "alt": "Product video thumbnail"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "1759911869119",
+    "user_id": "1759629070256",
+    "description": "2",
+    "status": "completed",
+    "deployed": false,
+    "created_at": "2025-10-08T08:24:29.119Z",
+    "updated_at": "2025-10-08T08:24:32.128Z",
+    "name": "Landing Page #1759911869119",
+    "landing_page_data": {
+      "sitemap": [
+        "block_001",
+        "block_002"
+      ],
+      "blocks": {
+        "block_001": {
+          "type": "navbar",
+          "subtype": "Navbar1",
+          "content": "content_001"
+        },
+        "block_002": {
+          "type": "hero_header_section",
+          "subtype": "Header3",
+          "content": "content_002"
+        }
+      },
+      "block_contents": {
+        "content_001": {
+          "logo": {
+            "url": "#",
+            "src": "/logo.png",
+            "alt": "Logo image"
+          },
+          "navLinks": [
+            {
+              "title": "Features",
+              "url": "#"
+            },
+            {
+              "title": "Pricing",
+              "url": "#"
+            },
+            {
+              "title": "About",
+              "url": "#"
+            }
+          ],
+          "buttons": [
+            {
+              "title": "Get Started",
+              "variant": "secondary",
+              "size": "sm"
+            }
+          ]
+        },
+        "content_002": {
+          "heading": "Build Beautiful Landing Pages",
+          "description": "Create stunning landing pages with AI assistance. Fast, beautiful, and conversion-optimized.",
+          "buttons": [
+            {
+              "title": "Get Started"
+            },
+            {
+              "title": "Watch Demo",
+              "variant": "secondary"
+            }
+          ],
+          "video": "https://www.youtube.com/embed/8DKLYsikxTs?si=Ch9W0KrDWWUiCMMW",
+          "image": {
+            "src": "https://d22po4pjz3o32e.cloudfront.net/placeholder-video-thumbnail.svg",
+            "alt": "Product video thumbnail"
+          }
+        }
+      }
+    }
   }
 ]

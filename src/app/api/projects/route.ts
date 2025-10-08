@@ -87,20 +87,42 @@ async function processProjectGeneration(projectId: string) {
             },
             block_002: {
               type: "hero_header_section",
-              subtype: "Layout1",
+              subtype: "Header3",
               content: "content_002"
             }
           },
           block_contents: {
             content_001: {
-              logo_src: "/logo.png",
-              button: "Get Started"
+              logo: {
+                url: "#",
+                src: "/logo.png",
+                alt: "Logo image"
+              },
+              navLinks: [
+                { title: "Features", url: "#" },
+                { title: "Pricing", url: "#" },
+                { title: "About", url: "#" }
+              ],
+              buttons: [
+                {
+                  title: "Get Started",
+                  variant: "secondary",
+                  size: "sm"
+                }
+              ]
             },
             content_002: {
-              title: "Build Beautiful Landing Pages",
-              desc: "Create stunning landing pages with AI assistance. Fast, beautiful, and conversion-optimized.",
-              button1: "Get Started",
-              button2: "Learn More"
+              heading: "Build Beautiful Landing Pages",
+              description: "Create stunning landing pages with AI assistance. Fast, beautiful, and conversion-optimized.",
+              buttons: [
+                { title: "Get Started" },
+                { title: "Watch Demo", variant: "secondary" }
+              ],
+              video: "https://www.youtube.com/embed/8DKLYsikxTs?si=Ch9W0KrDWWUiCMMW",
+              image: {
+                src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-video-thumbnail.svg",
+                alt: "Product video thumbnail"
+              }
             }
           }
         }

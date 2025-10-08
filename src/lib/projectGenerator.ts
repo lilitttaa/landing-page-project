@@ -533,6 +533,8 @@ export default App;`;
         return this.generateNavbarProps(content);
       case 'Layout1':
         return this.generateLayoutProps(content);
+      case 'Header3':
+        return this.generateHeaderProps(content);
       default:
         // For unknown components, try to pass all content as props
         // This is a fallback for future components
@@ -616,6 +618,19 @@ export default App;`;
       
       return `tagline="${this.escapeString(convertedData.tagline)}" heading="${this.escapeString(convertedData.heading)}" description="${this.escapeString(convertedData.description)}" buttons={${JSON.stringify(convertedData.buttons)}} image={${JSON.stringify(convertedData.image)}}`;
     }
+  }
+
+  private generateHeaderProps(content: LandingPageContent): string {
+    const heading = content.heading ?? "Medium length hero heading goes here";
+    const description = content.description ?? "";
+    const buttons = Array.isArray(content.buttons) ? content.buttons : [];
+    const video = content.video ?? "";
+    const image = content.image ?? {
+      src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-video-thumbnail.svg",
+      alt: "Relume placeholder image"
+    };
+
+    return `heading="${this.escapeString(heading)}" description="${this.escapeString(description)}" buttons={${JSON.stringify(buttons)}} video="${this.escapeString(video)}" image={${JSON.stringify(image)}}`;
   }
 
   async buildProject(projectPath: string): Promise<string> {

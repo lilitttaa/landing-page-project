@@ -1,0 +1,84 @@
+{
+  "componentName": "Header3",
+  "version": "1.0.0",
+  "properties": {
+    "heading": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string",
+      "required": true
+    },
+    "buttons": {
+      "type": "array",
+      "arrayItemType": {
+        "type": "object"
+      },
+      "required": true
+    },
+    "video": {
+      "type": "string",
+      "required": true
+    },
+    "image": {
+      "type": "object",
+      "required": true
+    }
+  },
+  "types": {
+    "ImageProps": {
+      "src": {
+        "type": "string",
+        "required": true
+      },
+      "alt": {
+        "type": "string",
+        "required": false
+      }
+    },
+    "Props": {
+      "heading": {
+        "type": "string",
+        "required": true
+      },
+      "description": {
+        "type": "string",
+        "required": true
+      },
+      "buttons": {
+        "type": "array",
+        "arrayItemType": {
+          "type": "object"
+        },
+        "required": true
+      },
+      "video": {
+        "type": "string",
+        "required": true
+      },
+      "image": {
+        "type": "object",
+        "required": true
+      }
+    }
+  },
+  "defaults": {
+    "heading": "Medium length hero heading goes here",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.",
+    "buttons": [
+      {
+        "title": "Button"
+      },
+      {
+        "title": "Button",
+        "variant": "secondary"
+      }
+    ],
+    "video": "https://www.youtube.com/embed/8DKLYsikxTs?si=Ch9W0KrDWWUiCMMW",
+    "image": {
+      "src": "https://d22po4pjz3o32e.cloudfront.net/placeholder-video-thumbnail.svg",
+      "alt": "Relume placeholder image"
+    }
+  }
+}
