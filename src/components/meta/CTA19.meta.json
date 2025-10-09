@@ -1,0 +1,41 @@
+{
+  "componentName": "CTA19",
+  "version": "1.0.0",
+  "properties": {
+    "heading": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string",
+      "required": true
+    },
+    "buttons": {
+      "type": "array",
+      "arrayItemType": {
+        "type": "object"
+      },
+      "required": true
+    }
+  },
+  "types": {
+    "Props": {
+      "heading": {
+        "type": "string",
+        "required": true
+      },
+      "description": {
+        "type": "string",
+        "required": true
+      },
+      "buttons": {
+        "type": "array",
+        "arrayItemType": {
+          "type": "object"
+        },
+        "required": true
+      }
+    }
+  },
+  "defaults": null
+}

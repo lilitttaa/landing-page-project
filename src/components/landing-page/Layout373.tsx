@@ -138,3 +138,5 @@ export const Layout373Defaults: Props = {
         ],
     },
 };
+
+export default Layout373;

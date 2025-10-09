@@ -102,3 +102,5 @@ export const Layout237Defaults: Props = {
         },
     ],
 };
+
+export default Layout237;

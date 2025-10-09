@@ -75,3 +75,5 @@ export const Header3Defaults: Props = {
         alt: "Relume placeholder image",
     },
 };
+
+export default Header3;

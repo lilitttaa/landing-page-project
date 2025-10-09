@@ -69,3 +69,5 @@ export const Layout197Defaults: Props = {
         },
     ],
 };
+
+export default Layout197;

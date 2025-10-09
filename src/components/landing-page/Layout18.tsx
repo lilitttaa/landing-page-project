@@ -73,3 +73,5 @@ export const Layout18Defaults: Props = {
         alt: "Relume placeholder image",
     },
 };
+
+export default Layout18;

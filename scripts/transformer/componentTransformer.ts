@@ -45,6 +45,8 @@ export class ComponentTransformer {
       this.logger?.regexApplied?.(description);
     });
 
+    updated = this.ensureDefaultExport(updated);
+
     return updated;
   }
 
@@ -65,5 +67,20 @@ export class ComponentTransformer {
         this.transformComponent(inputPath, outputPath);
       }
     }
+  }
+
+  private ensureDefaultExport(content: string): string {
+    if (/export\s+default\s+/m.test(content)) {
+      return content;
+    }
+
+    const match = content.match(/export\s+const\s+([A-Za-z0-9_]+)/);
+    if (!match) {
+      return content;
+    }
+
+    const componentName = match[1];
+    const trimmed = content.replace(/\s*$/, '');
+    return `${trimmed}\n\nexport default ${componentName};\n`;
   }
 }
