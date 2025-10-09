@@ -1,5 +1,84 @@
 import { TransformRule } from './types';
 
+function findEnclosingMapIndex(content: string, matchIndex: number): string | null {
+  const mapRegex = /\.map\(\s*\(([^)]*)\)\s*=>/g;
+  let match: RegExpExecArray | null;
+  let result: string | null = null;
+
+  while ((match = mapRegex.exec(content)) !== null) {
+    const paramsText = match[1];
+    const openParenIndex = content.indexOf('(', match.index);
+    if (openParenIndex === -1) {
+      continue;
+    }
+    const closeParenIndex = findMatchingParenIndex(content, openParenIndex);
+    if (closeParenIndex === -1) {
+      continue;
+    }
+
+    if (matchIndex < openParenIndex || matchIndex > closeParenIndex) {
+      continue;
+    }
+
+    const arrowIndex = content.indexOf('=>', match.index);
+    if (arrowIndex === -1 || arrowIndex > matchIndex || arrowIndex > closeParenIndex) {
+      continue;
+    }
+
+    result = extractIndexIdentifier(paramsText);
+  }
+
+  return result;
+}
+
+function findMatchingParenIndex(content: string, openIndex: number): number {
+  let depth = 0;
+  for (let i = openIndex; i < content.length; i++) {
+    const char = content[i];
+    if (char === '(') {
+      depth++;
+    } else if (char === ')') {
+      depth--;
+      if (depth === 0) {
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
+function extractIndexIdentifier(params: string): string {
+  let depth = 0;
+  let current = '';
+  const parts: string[] = [];
+
+  for (let i = 0; i < params.length; i++) {
+    const char = params[i];
+    if (char === ',' && depth === 0) {
+      parts.push(current.trim());
+      current = '';
+    } else {
+      if (char === '(' || char === '[' || char === '{') {
+        depth++;
+      } else if (char === ')' || char === ']' || char === '}') {
+        depth--;
+      }
+      current += char;
+    }
+  }
+
+  if (current.trim()) {
+    parts.push(current.trim());
+  }
+
+  if (parts.length < 2) {
+    return 'index';
+  }
+
+  const candidate = parts[1].split('=')[0].split(':')[0].trim();
+  return candidate || 'index';
+}
+
 export const EDITABLE_IMPORTS = [
   'EditableText',
   'EditableImage',
@@ -31,11 +110,20 @@ export const TRANSFORM_RULES: TransformRule[] = [
   },
   {
     pattern: /<Button\s+([^>]*?)>\s*\{([^}]+)\}\s*<\/Button>/g,
-    replacement: (match, attrs, textVar) => {
+    replacement: (match, attrs, textVar, offset, fullText) => {
       const buttonVar = textVar.replace('.title', '');
-      const hasKey = attrs.includes('key=');
-      const keyAttr = hasKey ? '' : ' key={index}';
-      return `<EditableButton button={${buttonVar}} path="buttons" index={index}${keyAttr} ${attrs.trim()} />`;
+      const indexIdentifier = findEnclosingMapIndex(fullText, offset);
+      const indexExpression = indexIdentifier ?? '0';
+      const attrParts = [
+        `button={${buttonVar}}`,
+        `path="buttons"`,
+        `index={${indexExpression}}`
+      ];
+      const extraAttrs = attrs.trim();
+      if (extraAttrs) {
+        attrParts.push(extraAttrs);
+      }
+      return `<EditableButton ${attrParts.join(' ')} />`;
     },
     description: 'Convert Button components to EditableButton'
   },
