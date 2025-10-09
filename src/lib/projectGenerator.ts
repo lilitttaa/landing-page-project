@@ -58,13 +58,35 @@ export class ProjectGenerator {
     await this.copyTailwindConfig(projectPath);
     console.log(`✅ Tailwind config copied in ${Date.now() - tailwindStartTime}ms`);
     
+    const installStartTime = Date.now();
+    console.log(`📦 [${new Date().toISOString()}] Installing npm dependencies...`);
+    await this.installDependencies(projectPath);
+    console.log(`✅ Dependencies installed in ${Date.now() - installStartTime}ms`);
+    
     console.log(`🏗️  [${new Date().toISOString()}] Project generation completed for ${projectId}`);
     return projectPath;
   }
 
   private async copyTemplate(targetPath: string): Promise<void> {
     await fs.promises.mkdir(targetPath, { recursive: true });
-    await this.copyDir(this.templatePath, targetPath);
+    const entries = await fs.promises.readdir(this.templatePath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      if (entry.name === 'node_modules' || entry.name === 'package-lock.json') {
+        continue;
+      }
+
+      const srcPath = path.join(this.templatePath, entry.name);
+      const destPath = path.join(targetPath, entry.name);
+
+      if (entry.isDirectory()) {
+        await this.copyDir(srcPath, destPath);
+      } else if (entry.isSymbolicLink()) {
+        await this.copySymlink(srcPath, destPath);
+      } else {
+        await fs.promises.copyFile(srcPath, destPath);
+      }
+    }
   }
 
   private async copyTailwindConfig(targetPath: string): Promise<void> {
@@ -123,10 +145,82 @@ export class ProjectGenerator {
       
       if (entry.isDirectory()) {
         await this.copyDir(srcPath, destPath);
+      } else if (entry.isSymbolicLink()) {
+        await this.copySymlink(srcPath, destPath);
       } else {
         await fs.promises.copyFile(srcPath, destPath);
       }
     }
+  }
+
+  private async copySymlink(srcPath: string, destPath: string): Promise<void> {
+    let linkTarget: string;
+
+    try {
+      linkTarget = await fs.promises.readlink(srcPath);
+    } catch (error) {
+      console.warn(`Unable to read symlink at ${srcPath}, copying file instead`, error);
+      await fs.promises.copyFile(srcPath, destPath);
+      return;
+    }
+
+    const resolvedTarget = path.isAbsolute(linkTarget)
+      ? linkTarget
+      : path.resolve(path.dirname(srcPath), linkTarget);
+
+    let linkType: fs.symlink.Type | undefined;
+    let fallbackMode: 'dir' | 'file' | 'unknown' = 'unknown';
+
+    try {
+      const targetStat = await fs.promises.stat(resolvedTarget);
+      if (targetStat.isDirectory()) {
+        fallbackMode = 'dir';
+        linkType = process.platform === 'win32' ? 'junction' : 'dir';
+      } else if (targetStat.isFile()) {
+        fallbackMode = 'file';
+        linkType = 'file';
+      }
+    } catch {
+      linkType = undefined;
+    }
+
+    try {
+      await fs.promises.unlink(destPath);
+    } catch (error: any) {
+      if (error?.code !== 'ENOENT') {
+        throw error;
+      }
+    }
+
+    try {
+      await fs.promises.symlink(linkTarget, destPath, linkType);
+    } catch (error) {
+      console.warn(`Failed to replicate symlink from ${srcPath} to ${destPath}:`, error);
+
+      try {
+        if (fallbackMode === 'dir') {
+          await this.copyDir(resolvedTarget, destPath);
+        } else if (fallbackMode === 'file') {
+          await fs.promises.copyFile(resolvedTarget, destPath);
+        } else {
+          await fs.promises.copyFile(srcPath, destPath);
+        }
+      } catch (fallbackError) {
+        console.warn(`Symlink fallback failed for ${srcPath}, attempting raw copy`, fallbackError);
+        await fs.promises.copyFile(srcPath, destPath);
+      }
+    }
+  }
+
+  private async installDependencies(projectPath: string): Promise<void> {
+    const nodeModulesPath = path.join(projectPath, 'node_modules');
+
+    if (await this.directoryExists(nodeModulesPath)) {
+      console.log('📦 Reusing existing node_modules directory, skipping npm install');
+      return;
+    }
+
+    await this.runCommand('npm install --prefer-offline --no-audit --no-fund', projectPath);
   }
 
   private async generateAppComponent(projectPath: string, landingPageData: LandingPageData): Promise<void> {
